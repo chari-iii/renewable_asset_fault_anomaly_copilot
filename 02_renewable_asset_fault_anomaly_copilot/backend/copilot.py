@@ -1,22 +1,14 @@
 """
-GenAI Copilot Module for Renewable Asset Fault & Anomaly Explanation.
+Operations Copilot Module for Renewable Asset Fault & Anomaly Explanation.
 Combines calculated telemetry variance, ML anomaly detections,
 and retrieved domain SOPs to deliver grounded, operator-ready explanations.
-Supports both deterministic rule-grounded generation and external LLM APIs (OpenAI/Gemini).
+Operates via deterministic engineering rules and standard operating procedures (ISO 10816 / IEC 62109).
 """
 
-import os
 import json
 from typing import Dict, Any, List, Optional
 from backend.domain_knowledge import retrieve_domain_context
 from backend.models import CopilotExplanation, AnomalyItem
-
-
-SYSTEM_PROMPT = """You are the Greenko Renewable Energy Asset Copilot, an expert AI operations engineer.
-Your role is to analyze SCADA telemetry anomalies in solar inverters and wind turbine generators.
-Always ground your answers strictly on the verified numerical facts provided.
-Never hallucinate or guess causes unsupported by telemetry.
-Use concise, professional engineering language suitable for control room operators."""
 
 
 def format_variance_text(actual_mw: float, expected_mw: float, variance_mw: float, variance_pct: float) -> str:
@@ -47,9 +39,10 @@ def generate_copilot_explanation(
 ) -> CopilotExplanation:
     """
     Core explanation generator:
-    1. Retrieves relevant domain SOP via domain retriever.
-    2. Constructs grounded facts from physics and telemetry.
-    3. Calls external LLM if configured; otherwise uses high-precision deterministic generator.
+    1. Retrieves relevant domain SOP via domain retriever (ISO 10816, IEC 62109, IEC 61724).
+    2. Determines operational severity from physics limits and ML anomaly scores.
+    3. Assembles verified telemetry evidence points.
+    4. Synthesizes operator-ready diagnosis, fault hypothesis, and standard maintenance checklist.
     """
     # 1. Retrieve domain standard
     sop = retrieve_domain_context(asset_id, temperature_c, vibration_mm_s, variance_mw, hour)
@@ -76,34 +69,7 @@ def generate_copilot_explanation(
 
     variance_str = format_variance_text(actual_power_mw, expected_power_mw, variance_mw, variance_pct)
 
-    # 4. Try external LLM if API key provided in environment, otherwise use grounded template
-    openai_key = os.getenv("OPENAI_API_KEY")
-    gemini_key = os.getenv("GEMINI_API_KEY")
-    
-    if (openai_key or gemini_key) and os.getenv("ENABLE_EXTERNAL_LLM", "false").lower() == "true":
-        try:
-            # External LLM pathway (if enabled and key present)
-            import httpx
-            prompt = f"""
-Telemetry Evidence:
-{json.dumps(evidence, indent=2)}
-
-Retrieved SOP:
-ID: {sop['id']}
-Standard: {sop['standard_reference']}
-Root Cause: {sop['root_cause_analysis']}
-
-User Query: {user_query or 'Analyze telemetry health and provide operator guidance.'}
-
-Please return JSON with:
-headline (str), fault_hypothesis (str), recommended_checks (list of str).
-"""
-            # Placeholder for external HTTP call (guarded with timeout and fallback)
-            # In production, uses httpx.post with OPENAI_API_KEY / GEMINI_API_KEY
-        except Exception:
-            pass  # Fall back gracefully to deterministic generator
-
-    # Deterministic Grounded Generation (100% reliable, zero hallucination, zero API cost)
+    # 4. Deterministic Grounded Synthesis (Grounded in telemetry physics and SOP standards)
     if "SOLAR" in asset_id.upper():
         if severity == "CRITICAL" or temperature_c > 45.0:
             headline = f"CRITICAL THERMAL/MECHANICAL ANOMALY on {asset_id} at Hour {hour:02d}:00"
@@ -146,5 +112,5 @@ headline (str), fault_hypothesis (str), recommended_checks (list of str).
         variance_analysis=variance_str,
         recommended_checks=sop["recommended_operator_actions"],
         retrieved_sop_standard=f"{sop['id']} ({sop['standard_reference']}): {sop['title']}",
-        safeguard_note="AI Guardrail: Output strictly derived from verified sensor limits, ISO 10816/IEC standards, and scikit-learn models."
+        safeguard_note="Engineering Guardrail: Output strictly derived from verified sensor limits, ISO 10816/IEC standards, and scikit-learn models."
     )

@@ -72,7 +72,7 @@ class RenewableAssetPipeline:
         self.df = df
         return df
 
-    def train_expected_power_models(self) -> Dict[str, Any]:
+    def train_expected_power_models(self, save_to_disk: bool = True) -> Dict[str, Any]:
         """
         Trains expected generation models with chronological time splits.
         Preserves temporal order: first 70% train, last 30% test (NO future lookahead).
@@ -178,12 +178,13 @@ class RenewableAssetPipeline:
             )
         }
 
-        # Save models
-        joblib.dump(self.solar_rf, MODELS_DIR / "solar_rf.joblib")
-        joblib.dump(self.wind_rf, MODELS_DIR / "wind_rf.joblib")
+        # Save models if requested
+        if save_to_disk:
+            joblib.dump(self.solar_rf, MODELS_DIR / "solar_rf.joblib")
+            joblib.dump(self.wind_rf, MODELS_DIR / "wind_rf.joblib")
         return results
 
-    def train_anomaly_detectors(self) -> Dict[str, Any]:
+    def train_anomaly_detectors(self, save_to_disk: bool = True) -> Dict[str, Any]:
         """
         Trains IsolationForest anomaly detectors for Solar and Wind assets.
         Also evaluates statistical 3-sigma / IQR baseline.
@@ -201,7 +202,8 @@ class RenewableAssetPipeline:
             random_state=42
         )
         self.solar_iso.fit(solar[solar_cols])
-        joblib.dump(self.solar_iso, MODELS_DIR / "solar_iso.joblib")
+        if save_to_disk:
+            joblib.dump(self.solar_iso, MODELS_DIR / "solar_iso.joblib")
 
         solar_pred = self.solar_iso.predict(solar[solar_cols])
         solar_flagged = set(solar[solar_pred == -1]['timestamp_id'].tolist())
@@ -233,7 +235,8 @@ class RenewableAssetPipeline:
             random_state=42
         )
         self.wind_iso.fit(wind[wind_cols])
-        joblib.dump(self.wind_iso, MODELS_DIR / "wind_iso.joblib")
+        if save_to_disk:
+            joblib.dump(self.wind_iso, MODELS_DIR / "wind_iso.joblib")
 
         wind_pred = self.wind_iso.predict(wind[wind_cols])
         wind_flagged = set(wind[wind_pred == -1]['timestamp_id'].tolist())
@@ -258,12 +261,40 @@ class RenewableAssetPipeline:
 
         return results
 
-    def load_data_and_train(self):
-        """Loads telemetry data and trains all forecasting and anomaly models."""
+    def load_data_and_train(self, force_retrain: bool = False):
+        """Loads telemetry data and reuses existing trained models if present on disk."""
         self.load_data()
-        power_metrics = self.train_expected_power_models()
-        anomaly_metrics = self.train_anomaly_detectors()
-        self.metrics = {**power_metrics, **anomaly_metrics}
+        
+        solar_rf_path = MODELS_DIR / "solar_rf.joblib"
+        wind_rf_path = MODELS_DIR / "wind_rf.joblib"
+        solar_iso_path = MODELS_DIR / "solar_iso.joblib"
+        wind_iso_path = MODELS_DIR / "wind_iso.joblib"
+        metrics_path = MODELS_DIR / "evaluation_metrics.json"
+
+        models_exist = (
+            solar_rf_path.exists() and
+            wind_rf_path.exists() and
+            solar_iso_path.exists() and
+            wind_iso_path.exists()
+        )
+
+        if models_exist and not force_retrain:
+            self.solar_rf = joblib.load(solar_rf_path)
+            self.wind_rf = joblib.load(wind_rf_path)
+            self.solar_iso = joblib.load(solar_iso_path)
+            self.wind_iso = joblib.load(wind_iso_path)
+            if metrics_path.exists():
+                import json
+                with open(metrics_path, "r") as f:
+                    self.metrics = json.load(f)
+            else:
+                power_metrics = self.train_expected_power_models(save_to_disk=False)
+                anomaly_metrics = self.train_anomaly_detectors(save_to_disk=False)
+                self.metrics = {**power_metrics, **anomaly_metrics}
+        else:
+            power_metrics = self.train_expected_power_models(save_to_disk=True)
+            anomaly_metrics = self.train_anomaly_detectors(save_to_disk=True)
+            self.metrics = {**power_metrics, **anomaly_metrics}
 
     def compute_all_predictions_and_variances(self) -> pd.DataFrame:
         """Computes expected generation, variance, and anomaly flags for all 240 telemetry rows."""

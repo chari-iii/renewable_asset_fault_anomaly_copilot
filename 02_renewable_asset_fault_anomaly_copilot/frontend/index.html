@@ -1348,6 +1348,11 @@
       });
 
       renderAnomalyTable(filtered);
+      if (charts.severity) {
+        const counts = computeSeverityDistribution(filtered, telemetrySeries, assetFilter);
+        charts.severity.data.datasets[0].data = [counts.critical, counts.warning, counts.normal];
+        charts.severity.update();
+      }
     }
 
     function renderCopilotList() {
@@ -1426,8 +1431,42 @@
       loadCopilotDetails('SOLAR_INV_01', 67, q);
     }
 
+    function computeSeverityDistribution(anomalies, telemetry, assetFilter = 'ALL') {
+      let filteredAnoms = anomalies || [];
+      let filteredTelemetry = telemetry || [];
+      if (assetFilter && assetFilter !== 'ALL') {
+        filteredAnoms = filteredAnoms.filter(a => a.asset_id === assetFilter);
+        filteredTelemetry = filteredTelemetry.filter(t => t.asset_id === assetFilter);
+      }
+      const crit = filteredAnoms.filter(a => a.severity === 'CRITICAL').length;
+      const warn = filteredAnoms.filter(a => ['HIGH', 'MEDIUM', 'LOW', 'WARNING'].includes(a.severity)).length;
+      const totalRecs = filteredTelemetry.length || (fleetSummary ? fleetSummary.total_records : 240);
+      const norm = Math.max(0, totalRecs - (crit + warn));
+      return { critical: crit, warning: warn, normal: norm };
+    }
+
+    function updateChartsForAsset(assetId = 'ALL') {
+      if (charts.severity) {
+        const counts = computeSeverityDistribution(allAnomalies, telemetrySeries, assetId);
+        charts.severity.data.datasets[0].data = [counts.critical, counts.warning, counts.normal];
+        charts.severity.update();
+      }
+      if (charts.power && telemetrySeries.length > 0) {
+        let filteredSeries = telemetrySeries;
+        if (assetId && assetId !== 'ALL') {
+          filteredSeries = telemetrySeries.filter(s => s.asset_id === assetId);
+        }
+        const slice = filteredSeries.slice(0, 48);
+        charts.power.data.labels = slice.map(s => `H${s.hour} (#${s.timestamp_id})`);
+        charts.power.data.datasets[0].data = slice.map(s => s.power_mw);
+        charts.power.data.datasets[1].data = slice.map(s => s.expected_power_mw);
+        charts.power.update();
+      }
+    }
+
     function onGlobalAssetChange() {
       const selected = document.getElementById('globalAssetFilter').value;
+      updateChartsForAsset(selected);
       if (selected === 'SOLAR_INV_01') {
         switchTab('solar');
       } else if (selected === 'WTG_07') {
@@ -1482,15 +1521,16 @@
         });
       }
 
-      // 2. Anomaly Distribution Doughnut
+      // 2. Anomaly Distribution Doughnut (Dynamically computed from API telemetry)
       const ctxSev = document.getElementById('chartSeverityDoughnut')?.getContext('2d');
       if (ctxSev) {
+        const counts = computeSeverityDistribution(allAnomalies, telemetrySeries, 'ALL');
         charts.severity = new Chart(ctxSev, {
           type: 'doughnut',
           data: {
             labels: ['Critical Alarms (Zone D)', 'Medium / Warning Drift', 'Normal Operational'],
             datasets: [{
-              data: [5, 5, 230],
+              data: [counts.critical, counts.warning, counts.normal],
               backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
               borderWidth: 0
             }]

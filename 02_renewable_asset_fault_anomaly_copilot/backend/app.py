@@ -54,6 +54,13 @@ def serve_frontend_index():
     return FileResponse(FRONTEND / "index.html")
 
 
+@app.get("/health")
+@app.get("/api/health")
+def health_check():
+    """Service health check endpoint for monitoring and cloud deployment."""
+    return {"status": "healthy", "service": "renewable_asset_fault_anomaly_copilot", "records": len(pipeline.df)}
+
+
 @app.get("/api/fleet/summary", response_model=FleetSummary)
 def get_fleet_summary():
     """Returns aggregated fleet KPI metrics calculated from real SCADA telemetry."""

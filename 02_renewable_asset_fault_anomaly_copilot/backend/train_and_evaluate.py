@@ -15,11 +15,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from backend.pipeline import RenewableAssetPipeline, MODELS_DIR
 
 def main():
+    force_retrain = "--retrain" in sys.argv
     print("=" * 75)
     print("GREENKO RENEWABLE ASSET FAULT & ANOMALY COPILOT - EVALUATION SUITE")
+    if force_retrain:
+        print("Mode: Retraining models from telemetry dataset...")
+    else:
+        print("Mode: Evaluating existing trained models (reproducible verification)")
     print("=" * 75)
 
     pipeline = RenewableAssetPipeline()
+    pipeline.load_data_and_train(force_retrain=force_retrain)
     metrics = pipeline.metrics
 
     print("\n[1] EXPECTED POWER GENERATION MODELS (VARIANCE BASELINE)")
