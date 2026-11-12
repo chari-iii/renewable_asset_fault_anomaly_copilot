@@ -102,6 +102,12 @@ def demo():
     }
 
 
+@app.get("/api/run")
+def run_case_get(text: str = "", asset_id: Optional[str] = None, timestamp_id: Optional[int] = None):
+    """Allows direct browser GET requests to test the copilot pipeline."""
+    return run_case(Query(text=text, asset_id=asset_id, timestamp_id=timestamp_id))
+
+
 @app.post("/api/run")
 def run_case(query: Query):
     """
