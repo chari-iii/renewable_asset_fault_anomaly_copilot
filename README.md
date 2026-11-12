@@ -12,7 +12,7 @@
 The complete project implementation, source code, models, and 18-section technical documentation are located in:
 
 👉 [**02_renewable_asset_fault_anomaly_copilot/**](./02_renewable_asset_fault_anomaly_copilot)  
-👉 [**Full Technical README (18 Sections)**](./02_renewable_asset_fault_anomaly_copilot/README.md)
+👉 [**Full Technical README (23 Sections)**](./02_renewable_asset_fault_anomaly_copilot/README.md)
 
 ---
 

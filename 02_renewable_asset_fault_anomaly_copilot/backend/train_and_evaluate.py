@@ -64,9 +64,20 @@ def main():
         json.dump(metrics, f, indent=2)
     print(f"\n[OK] Evaluation metrics saved to: {metrics_path}")
 
+    print("\n[3] METHODOLOGY LIMITATION & DATASET AUDIT (ANOMALY EVALUATION)")
+    print("-" * 75)
+    print("  * Evaluation Type: In-sample benchmark anomaly capture on predefined synthetic faults.")
+    print("  * Injected Synthetic Faults: Solar TS #67-69 (inverter thermal blower), Wind TS #173-174 (bearing degradation).")
+    print("  * Chronological Split Limitation: All known synthetic fault events occur in the first 70% of each")
+    print("    asset's chronological telemetry (timestamps <= 84 for Solar, <= 204 for Wind).")
+    print("  * Out-of-Sample Evaluation: The 30% chronological test split contains 0 labeled faults, precluding")
+    print("    independent out-of-sample supervised recall calculation without fabricating ground-truth labels.")
+    print("  * Conclusion: In-sample recall (100%) demonstrates algorithm sensitivity to known physical fault patterns,")
+    print("    but must NOT be reported as independent out-of-sample real-world operational validation.")
+
     # Display detected anomalies
     anomalies = pipeline.get_detected_anomalies()
-    print(f"\n[3] CONFIRMED CRITICAL FAULT EVENTS ({len([a for a in anomalies if a.severity == 'CRITICAL'])})")
+    print(f"\n[4] CONFIRMED CRITICAL FAULT EVENTS ({len([a for a in anomalies if a.severity == 'CRITICAL'])})")
     print("-" * 75)
     for a in anomalies:
         if a.severity == 'CRITICAL':

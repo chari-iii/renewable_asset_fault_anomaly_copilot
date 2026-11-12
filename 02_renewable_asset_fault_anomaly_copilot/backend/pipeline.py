@@ -223,7 +223,8 @@ class RenewableAssetPipeline:
             'precision': float(solar_prec),
             'recall': float(solar_rec),
             'f1_score': float(solar_f1),
-            'known_fault_capture': f"{solar_tp}/{len(self.known_solar_faults)}"
+            'known_fault_capture': f"{solar_tp}/{len(self.known_solar_faults)}",
+            'evaluation_split_note': 'In-sample benchmark evaluation on predefined synthetic faults (TS #67-69). The 30% test split contains zero labeled faults, precluding independent out-of-sample supervised recall.'
         }
 
         # 2. WIND ISOLATION FOREST
@@ -256,7 +257,8 @@ class RenewableAssetPipeline:
             'precision': float(wind_prec),
             'recall': float(wind_rec),
             'f1_score': float(wind_f1),
-            'known_fault_capture': f"{wind_tp}/{len(self.known_wind_faults)}"
+            'known_fault_capture': f"{wind_tp}/{len(self.known_wind_faults)}",
+            'evaluation_split_note': 'In-sample benchmark evaluation on predefined synthetic faults (TS #173-174). The 30% test split contains zero labeled faults, precluding independent out-of-sample supervised recall.'
         }
 
         return results

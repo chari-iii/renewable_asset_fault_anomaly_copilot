@@ -58,7 +58,8 @@
     "precision": 0.6,
     "recall": 1.0,
     "f1_score": 0.7499999999999999,
-    "known_fault_capture": "3/3"
+    "known_fault_capture": "3/3",
+    "evaluation_split_note": "In-sample benchmark evaluation on predefined synthetic faults (TS #67-69). The 30% test split contains zero labeled faults, precluding independent out-of-sample supervised recall."
   },
   "wind_anomaly_detection": {
     "algorithm": "Isolation Forest",
@@ -75,6 +76,7 @@
     "precision": 0.4,
     "recall": 1.0,
     "f1_score": 0.5714285714285715,
-    "known_fault_capture": "2/2"
+    "known_fault_capture": "2/2",
+    "evaluation_split_note": "In-sample benchmark evaluation on predefined synthetic faults (TS #173-174). The 30% test split contains zero labeled faults, precluding independent out-of-sample supervised recall."
   }
 }

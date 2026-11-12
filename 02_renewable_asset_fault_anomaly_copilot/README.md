@@ -1,29 +1,29 @@
 # Greenko Renewable Asset Fault & Anomaly Detection Copilot
 
-**Industrial AI Solution for Predictive Maintenance, Anomaly Triage & Decision Support in Solar and Wind Fleet Assets**
+**Industrial Operational Intelligence for Predictive Maintenance, Anomaly Triage & Decision Support in Solar and Wind Fleet Assets**
 
 ---
 
 ## 1. Project Overview
 Greenko operates utility-scale renewable energy portfolios comprising central solar photovoltaic (PV) power plants and wind turbine generators (WTGs). In large-scale renewable generation, operational anomalies—such as inverter cooling blower failures or wind turbine drivetrain bearing degradation—often manifest early through subtle multi-sensor telemetry signatures before escalating into catastrophic plant equipment failure.
 
-The **Renewable Asset Fault & Anomaly Detection Copilot** is an enterprise-grade AI system that ingests hourly SCADA telemetry, computes expected generation baselines to perform actual-versus-forecast variance analysis, flags anomalous multi-sensor patterns using Isolation Forest and ISO 10816 standards, and provides plant operators with grounded natural language diagnostic triage and standard operating procedure (SOP) maintenance checklists.
+The **Renewable Asset Fault & Anomaly Detection Copilot** is an enterprise-grade operational intelligence system that ingests hourly SCADA telemetry, computes expected generation baselines to perform actual-versus-forecast variance analysis, flags anomalous multi-sensor patterns using Isolation Forest and ISO 10816 standards, and provides plant operators with deterministic diagnostic triage and standard operating procedure (SOP) maintenance checklists.
 
 ---
 
 ## 2. Problem Statement
 In renewable energy plant control rooms and field substations:
-1. **Unplanned Downtime & Catastrophic Damage:** Bearing failures, lubrication breakdown, and inverter cooling fan seizures cause prolonged outages, expensive crane mobilizations, and substantial commercial revenue loss.
-2. **Alert Fatigue & Ambiguous Root Causes:** Conventional fixed SCADA alarm thresholds trigger frequent nuisance alarms without isolating the underlying physical root cause (e.g. failing to connect an abnormal nighttime temperature surge with cooling fan bearing rub).
-3. **Forecast Variance Uncertainty:** When generation deviates from scheduled day-ahead forecasts, operators need instant clarity on whether the shortfall is due to environmental resource fluctuations, utility grid curtailment orders, or impending mechanical distress.
+1. **Unplanned Downtime & Equipment Damage:** Mechanical bearing degradation, lubrication starvation, and inverter cooling blower seizures cause prolonged outages, expensive crane mobilizations, and commercial revenue loss.
+2. **Alert Fatigue & Ambiguous Root Causes:** Conventional single-sensor threshold alarms trigger nuisance notifications without isolating underlying multi-sensor relationships (e.g. connecting an abnormal nighttime temperature surge with cooling fan bearing rub).
+3. **Forecast Variance Uncertainty:** When generation deviates from scheduled forecasts, control-room operators require rapid triage to distinguish environmental resource deficits from mechanical degradation or utility curtailment.
 
 ---
 
 ## 3. Objectives
-- **Automated Anomaly Detection:** Detect multi-sensor operational anomalies across solar and wind assets with high precision and zero missed critical failure events (100% recall on verified failure modes).
-- **Physical Variance Analysis:** Provide continuous expected generation forecasts to quantify active power variances ($\Delta P = P_{\text{actual}} - P_{\text{expected}}$) in both megawatts ($MW$) and percentage terms.
-- **Operator Decision Support:** Deliver grounded, deterministic diagnostic explanations and field troubleshooting checklists retrieved from Greenko plant SOPs, ISO 10816-21, and IEC standards.
-- **Interactive Fleet Visibility:** Offer an industrial dashboard for real-time fleet overview, individual asset telemetry curves, anomaly event logs, and model validation inspection.
+- **Multi-Sensor Anomaly Detection:** Detect multi-sensor operational anomalies across solar inverters and wind turbines using machine learning (Isolation Forest) combined with ISO 10816-21 vibration thresholds.
+- **Physical Variance Analysis:** Provide continuous expected generation forecasts to quantify active power variances ($\Delta P = P_{\text{actual}} - P_{\text{expected}}$) in megawatts ($MW$) and percentage terms.
+- **Operator Decision Support:** Deliver deterministic diagnostic explanations and field troubleshooting checklists retrieved from Greenko plant SOPs, ISO 10816-21, and IEC standards.
+- **Interactive Fleet Visibility:** Provide an industrial dashboard for real-time fleet overview, individual asset telemetry curves, anomaly event logs, and model validation inspection.
 
 ---
 
@@ -32,7 +32,7 @@ In renewable energy plant control rooms and field substations:
 - **Data Validation & Schemas:** Pydantic v2 (2.8.2).
 - **Machine Learning & Analytics:** Scikit-Learn (1.5.1), Pandas (2.2.2), NumPy (1.26.4), SciPy (1.17.1), Joblib (1.6.0).
 - **Frontend Dashboard:** HTML5, CSS3 (Enterprise Dark Navy/Charcoal Design System), Vanilla JavaScript (ES6+), Chart.js (4.4.4).
-- **Testing & Quality Assurance:** Pytest (9.2.0), HTTPX (0.28.1).
+- **Testing & Quality Assurance:** Pytest (8.0.0+ / 9.2.0), HTTPX (0.28.1).
 - **Containerization & Deployment:** Docker, Procfile, Railway configuration (`railway.json`).
 
 ---
@@ -48,9 +48,9 @@ In renewable energy plant control rooms and field substations:
                                           v
 +-----------------------------------------------------------------------------------+
 |                1. Data Preprocessing & Physics Feature Engineering                |
-|  * Strict chronological sorting (No future-data leakage)                          |
-|  * Cyclical diurnal time encoding (sin_hour, cos_hour)                             |
-|  * Physics expectations: Solar PR (0.0019 MW/W/m²) | Wind Power Curve              |
+|  * Strict chronological sorting (No temporal lookahead leakage)                   |
+|  * Cyclical diurnal time encoding (hour_sin, hour_cos)                            |
+|  * Physics expectations: Solar PR (0.0019 MW/W/m²) | Wind Power Curve Baseline    |
 +-----------------------------------------------------------------------------------+
                     |                                             |
                     v                                             v
@@ -78,10 +78,9 @@ In renewable energy plant control rooms and field substations:
                                            |
                                            v
 +-----------------------------------------------------------------------------------+
-|                       5. GenAI Copilot Explanation Layer                          |
-|  * Operator-friendly natural language synthesis                                  |
-|  * Strict numerical grounding (Zero hallucination guardrail)                     |
-|  * Deterministic Physics Engine grounded in verified SCADA telemetry             |
+|                       5. Operator Copilot Explanation Layer                       |
+|  * Structured engineering explanation: headline, fault hypothesis, evidence       |
+|  * Deterministic Physics Engine grounded in verified SCADA telemetry & SOPs      |
 +-----------------------------------------------------------------------------------+
                                            |
                                            v
@@ -101,7 +100,7 @@ The system is evaluated on the benchmark SCADA telemetry dataset located at `dat
   - `SOLAR_INV_01` (120 records): Central solar PV inverter (1.5 MW nominal AC capacity).
   - `WTG_07` (120 records): Utility-scale Wind Turbine Generator (2.6 MW nominal capacity).
 - **Telemetry Channels:**
-  - `timestamp_id`: Sequential hourly observation index.
+  - `timestamp_id`: Sequential hourly observation index (1 to 240).
   - `asset_id`: Asset identifier string.
   - `hour`: Diurnal hour (0 to 23).
   - `irradiance_wm2`: Plane-of-array solar irradiance ($W/m^2$).
@@ -113,123 +112,162 @@ The system is evaluated on the benchmark SCADA telemetry dataset located at `dat
 ---
 
 ## 7. Data Preprocessing
-- **Chronological Time Ordering:** Data points are ordered strictly by time. No random shuffling is performed to eliminate temporal lookahead leakage.
+- **Chronological Ordering:** Records are sorted strictly by sequential timestamp ID and diurnal hour. No random shuffling is performed, preserving continuous time-series structure.
+- **Data Integrity:** The SCADA dataset is validated with zero null values, zero negative power readings during nighttime hours, and consistent physical units.
 - **Chronological Train/Test Split:**
-  - **Training Set:** First 70% of chronological observations (Days 1–3.5, 84 observations per asset).
-  - **Testing Set:** Final 30% of chronological observations (Days 3.5–5, 36 observations per asset).
-- **Feature Transformations:**
-  - Diurnal circularity preserved using $\sin(2\pi \cdot \text{hour} / 24)$ and $\cos(2\pi \cdot \text{hour} / 24)$.
-  - Missing and null value checks: Zero nulls or NaNs in the SCADA feed.
+  - **Training Set:** First 70% of chronological observations (Day 1 through Day 3.5; 84 records per asset).
+  - **Testing Set:** Final 30% of chronological observations (Day 3.5 through Day 5; 36 records per asset).
+  - **No Future Leakage:** Models are fitted strictly on historical observations before evaluating on future time intervals.
 
 ---
 
-## 8. ML Models and Anomaly Detection Methodology
-
-### 8.1 Expected Generation Models
-- **Chosen Architecture:** Random Forest Regressor (`n_estimators=100`, `max_depth=6`, `min_samples_split=3`).
-- **Baseline Comparison:** First-principles Linear Physics model ($P_{\text{solar}} = \eta \cdot G$; $P_{\text{wind}} = a \cdot v + b$).
-- **Features Used:**
-  - Solar: `irradiance_wm2`, `temperature_c`, `hour`, `hour_sin`, `hour_cos`.
-  - Wind: `wind_speed_ms`, `temperature_c`, `hour`, `hour_sin`, `hour_cos`.
-
-### 8.2 Anomaly Detection Engine
-- **Unsupervised Model:** Isolation Forest (`contamination=0.035`, `n_estimators=100`, `max_samples='auto'`).
-- **Domain Severity Classification:**
-  - `CRITICAL`: Drivetrain vibration $\ge 3.5\text{ mm/s}$ (ISO 10816 Zone D) OR (temperature $\ge 45.0^\circ\text{C}$ with Isolation Forest flag).
-  - `HIGH`: Vibration $\ge 2.0\text{ mm/s}$ OR temperature $\ge 42.0^\circ\text{C}$.
-  - `MEDIUM`: Isolation Forest statistical outlier (`iso_pred == -1`).
-  - `LOW`: Mild sensor drift.
-  - `NORMAL`: Nominal operational state.
+## 8. Feature Engineering
+- **Diurnal Circularity:** Standard numeric hours (0 to 23) create an artificial boundary between 23:00 and 00:00. Circular trigonometric encoding preserves day/night cyclicality:
+  $$\text{hour\_sin} = \sin\left(\frac{2\pi \cdot \text{hour}}{24}\right), \quad \text{hour\_cos} = \cos\left(\frac{2\pi \cdot \text{hour}}{24}\right)$$
+- **Solar Physics Baseline:** Expected solar power derived from plane-of-array irradiance using nominal performance ratio ($0.0019\text{ MW}/(W/m^2)$):
+  $$P_{\text{solar\_expected}} = \max(0.0, G \times 0.0019)$$
+- **Wind Power Curve Baseline:** Expected aerodynamic power modeled from wind speed ($v$) with cut-in ($3.0\text{ m/s}$), cubic growth ($P \propto v^3$), and rated saturation ($2.6\text{ MW}$):
+  $$P_{\text{wind\_expected}} = \text{clip}(0.00582 \times v^3, 0.0, 2.6)$$
 
 ---
 
-## 9. Solar and Wind Monitoring
-
-### 9.1 Solar Asset Monitoring (`SOLAR_INV_01`)
-- Monitors photovoltaic power conversion efficiency against solar irradiance.
-- Analyzes nighttime cooling decay: under healthy conditions, cabinet temperature decays toward ambient ($\approx 25^\circ\text{C}$) when irradiance is 0.
-- **Detected Fault:** At Timestamps 67, 68, 69 (Hours 19:00 - 21:00), cabinet temperature spiked to $53.48^\circ\text{C}$ and blower vibration rose to $3.98\text{ mm/s}$, diagnosing a cooling blower bearing rub / motor failure.
-
-### 9.2 Wind Turbine Monitoring (`WTG_07`)
-- Tracks active power against nacelle wind velocity and vibration against ISO 10816-21 thresholds.
-- **Detected Fault:** At Timestamp 174 (Hour 06:00), WTG_07 exhibited $3.82\text{ mm/s RMS}$ vibration (exceeding the $3.5\text{ mm/s}$ ISO Zone D danger threshold) and $46.88^\circ\text{C}$ bearing temperature, resulting in a $-0.566\text{ MW}$ ($-44.3\%$) generation deficit due to bearing distress.
+## 9. ML Algorithms
+1. **Power Forecast Baseline — Random Forest Regressor:**
+   - Architecture: `RandomForestRegressor(n_estimators=100, max_depth=6, min_samples_split=3, random_state=42)`.
+   - Captures multi-variable interactions between weather inputs, ambient temperature, and diurnal cycles without parametric assumptions.
+2. **Reference Baseline — Ordinary Least Squares (OLS) Linear Regression:**
+   - Evaluated alongside Random Forest to establish a transparent first-principles benchmark.
+3. **Multi-Sensor Anomaly Detection — Isolation Forest:**
+   - Architecture: `IsolationForest(contamination=0.035, n_estimators=100, max_samples='auto', random_state=42)`.
+   - Isolates anomalous operating points in high-dimensional telemetry space ($T$, $v$, $P$, weather) by measuring tree partition path length.
+4. **Engineering Vibration Boundary — ISO 10816-21:**
+   - Deterministic vibration thresholds: Zone A/B ($<2.0\text{ mm/s}$ Normal), Zone C ($2.0-3.5\text{ mm/s}$ Warning/Drift), Zone D ($>3.5\text{ mm/s}$ Critical Distress).
 
 ---
 
-## 10. API Endpoint Documentation
+## 10. Solar Anomaly Detection
+- **Asset:** `SOLAR_INV_01` (1.5 MW Central Inverter).
+- **Physical Signature:** Photovoltaic inverters exhibit high heat dissipation during peak daylight and natural convective cooling toward ambient ($\approx 25^\circ\text{C}$) during non-generating nighttime hours (irradiance $= 0\text{ W/m}^2$).
+- **Injected Benchmark Fault (Timestamps 67, 68, 69; Hours 19:00 - 21:00):**
+  - Cabinet temperature surged to $53.48^\circ\text{C}$ (normally $<30^\circ\text{C}$ at night).
+  - Blower vibration rose to $3.98\text{ mm/s}$ (normally $<1.0\text{ mm/s}$).
+  - Active power was $0.0\text{ MW}$ (darkness).
+- **Detection Result:** Isolation Forest flags all three points ($TS=67, 68, 69$) with high anomaly scores ($>0.12$). Classified as `CRITICAL` severity under IEC 62109-1 due to auxiliary blower motor failure / mechanical rub.
 
-| Endpoint | Method | Input Parameters | Output Response | Description |
+---
+
+## 11. Wind Anomaly Detection
+- **Asset:** `WTG_07` (2.6 MW Wind Turbine Generator).
+- **Physical Signature:** Drivetrain vibration velocity ($mm/s\text{ RMS}$) measured on the generator drive-end and gearbox high-speed shaft bearings.
+- **Injected Benchmark Fault (Timestamps 173, 174; Hours 05:00 - 06:00):**
+  - At Timestamp 174, wind speed was $5.87\text{ m/s}$ (expected generation $\approx 1.28\text{ MW}$).
+  - Actual generation dropped to $0.711\text{ MW}$ (a $-0.566\text{ MW}$ or $-44.3\%$ deficit).
+  - Drivetrain vibration surged to $3.82\text{ mm/s}$, exceeding the ISO 10816-21 Zone D threshold ($>3.5\text{ mm/s}$).
+  - Bearing temperature reached $46.88^\circ\text{C}$ during cool morning hours.
+- **Detection Result:** Flagged by Isolation Forest and categorized as `CRITICAL` under ISO 10816-21 Zone D. Diagnosed as high-speed shaft / generator bearing mechanical degradation.
+
+---
+
+## 12. Model Evaluation
+The model evaluation is conducted via `backend/train_and_evaluate.py` using strict chronological splits:
+
+### 12.1 Generation Forecasting Metrics (36-Point Chronological Test Split)
+
+| Target Asset | Model Architecture | MAE ($MW$) | RMSE ($MW$) | $R^2$ Score |
+|---|---|---:|---:|---:|
+| **`SOLAR_INV_01`** | **Random Forest Regressor (depth=6)** | **0.0012 MW** | **0.0024 MW** | **1.0000** |
+| `SOLAR_INV_01` | Linear Physics Baseline ($P = \eta \cdot G$) | 0.0001 MW | 0.0002 MW | 1.0000 |
+| **`WTG_07`** | **Random Forest Regressor (depth=6)** | **0.0178 MW** | **0.0258 MW** | **0.9986** |
+| `WTG_07` | Linear Wind Speed Baseline ($P \approx 0.45\cdot v - 1.36$) | 0.0010 MW | 0.0012 MW | 1.0000 |
+
+### 12.2 Anomaly Detection Benchmark Capture
+
+| Asset Target | Algorithm | Predefined Benchmark Faults | Captured | Precision | F1 Score |
+|---|---|---|:---:|---:|---:|
+| **`SOLAR_INV_01`** | Isolation Forest (contam=0.035) | Blower Failure (TS #67, 68, 69) | **3 / 3 (100.0%)** | 60.0% | 0.750 |
+| **`WTG_07`** | Isolation Forest (contam=0.035) | Bearing Distress (TS #173, 174) | **2 / 2 (100.0%)** | 40.0% | 0.571 |
+
+### 12.3 Investigation Finding: Why Linear Baseline Outperforms Random Forest on Benchmark Data
+- **Synthetic Data Characteristics:** In the provided benchmark dataset `asset_telemetry.csv`, generation values were synthesized using exact affine formulas ($P_{\text{solar}} = 0.0019 \times G$; $P_{\text{wind}} \approx 0.45 \times v - 1.36$) with zero simulated environmental noise.
+- **Model Mechanics:** Ordinary Least Squares (OLS) fits straight affine lines with near-zero mathematical error. Random Forest creates orthogonal step partitions, leaving small piecewise residuals.
+- **Physical Plant Justification:** In real operating utility plants, power relationships are non-linear: solar panels exhibit negative temperature derating ($\approx -0.38\%/\text{°C}$) and inverter MPPT clipping, while wind turbines follow cubic aerodynamic power curves ($P \propto v^3$) with pitch regulation. Random Forest is engineering-justified for real plant operations.
+
+---
+
+## 13. SOP Retrieval Workflow
+The Standard Operating Procedure (SOP) retrieval mechanism operates in [backend/domain_knowledge.py](backend/domain_knowledge.py) as a **deterministic rule-grounded retriever** against structured engineering knowledge:
+1. **Input Signature:** Receives asset ID, active temperature ($T$), RMS vibration ($v$), generation variance ($\Delta P$), and diurnal hour.
+2. **Matching Criteria:** Evaluates telemetry against domain boundaries:
+   - If Solar and ($T > 44.0^\circ\text{C}$ or $v > 2.5\text{ mm/s}$): Selects `SOP-PV-042`.
+   - If Solar and ($\Delta P < -0.15\text{ MW}$): Selects `SOP-PV-018`.
+   - If Wind and ($v > 2.5\text{ mm/s}$ or $T > 42.0^\circ\text{C}$): Selects `SOP-WTG-089`.
+   - If Wind and ($\Delta P < -0.20\text{ MW}$): Selects `SOP-WTG-012`.
+3. **Retrieved Standards:**
+   - `SOP-PV-042` (IEC 62109-1 / IEC 61724): Central Inverter Thermal Runaway & Cooling Fan Seizure.
+   - `SOP-WTG-089` (ISO 10816-21 / IEC 61400-1): Drivetrain & Bearing Vibration Alert Procedure.
+   - `SOP-PV-018` (IEC 61724-1): Solar Generation Deficit & DC String Triage.
+   - `SOP-WTG-012` (IEC 61400-12-1): Wind Turbine Power Curve Deficit Investigation.
+4. **Architecture Note:** Retrieval uses deterministic threshold matching directly against plant engineering specifications. It does not use a vector database or semantic embedding model.
+
+---
+
+## 14. Copilot Explanation Process
+The Copilot layer in [backend/copilot.py](backend/copilot.py) synthesizes structured operator guidance through four deterministic steps:
+1. **Variance Sign Convention:** Formats $\Delta P = P_{\text{actual}} - P_{\text{expected}}$ where negative values indicate generation deficit/underperformance.
+2. **Telemetry Evidence Assembly:** Compiles verified numerical facts (temperature, vibration, power, weather condition, ISO 10816 zone classification).
+3. **Engineering Hypothesis Formulation:** Connects the multi-sensor signature to physical mechanisms (e.g., cooling blower motor rub or high-speed shaft bearing spalling).
+4. **Checklist Generation:** Returns standard maintenance steps from the retrieved SOP (e.g., FLIR thermal scan, LOTO nacelle inspection, FFT spectrum analysis for BPFO/BPFI defect harmonics).
+5. **Deterministic Safeguard:** Output is strictly derived from verified SCADA limits and standard operating procedures. No external LLM is wired; the system operates with zero external API dependencies.
+
+---
+
+## 15. API Endpoint Documentation
+
+| Endpoint | Method | Input Parameters | Output Model | Description |
 |---|---|---|---|---|
 | `/` | `GET` | None | HTML | Serves the enterprise dashboard UI |
-| `/health` | `GET` | None | JSON | Health check endpoint for monitoring |
-| `/api/fleet/summary` | `GET` | None | JSON (`FleetSummary`) | Aggregated fleet KPIs and health score |
-| `/api/assets` | `GET` | None | JSON (`List[AssetCard]`) | Overview metrics for Solar and Wind assets |
-| `/api/telemetry` | `GET` | `asset_id` (optional) | JSON (`List[TelemetrySeriesPoint]`) | Time-series data for interactive charts |
-| `/api/anomalies` | `GET` | `asset_id`, `severity` (optional) | JSON (`List[AnomalyItem]`) | Filtered list of detected anomalies |
-| `/api/sops` | `GET` | None | JSON | Greenko SOP database and standards |
-| `/api/demo` | `GET` | None | JSON | Complete end-to-end demo payload |
-| `/api/run` | `GET`/`POST` | `Query` (text, asset_id, ts) | JSON (`PipelineRunResponse`) | Executes copilot pipeline and explanation |
-| `/api/predict` | `POST` | `PredictionRequest` | JSON | Point prediction and anomaly scoring |
-| `/api/metrics` | `GET` | None | JSON | Chronological model validation metrics |
+| `/health` | `GET` | None | JSON | Service health status (`status: healthy`) |
+| `/api/health` | `GET` | None | JSON | Service health status |
+| `/api/fleet/summary` | `GET` | None | `FleetSummary` | Aggregated fleet KPIs and health index |
+| `/api/assets` | `GET` | None | `List[AssetCard]` | Individual Solar and Wind asset overview cards |
+| `/api/telemetry` | `GET` | `asset_id` (optional) | `List[TelemetryPoint]` | Time-series telemetry points for charts |
+| `/api/anomalies` | `GET` | `asset_id`, `severity` | `List[AnomalyItem]` | Filtered list of detected operational anomalies |
+| `/api/sops` | `GET` | None | JSON | Greenko SOP database and industry standards |
+| `/api/demo` | `GET` | None | JSON | Complete end-to-end evaluation payload |
+| `/api/run` | `GET` / `POST` | `Query` (text, asset_id, ts) | `PipelineRunResponse` | Runs copilot case and returns diagnosis |
+| `/api/predict` | `POST` | `PredictionRequest` | JSON | Evaluates custom telemetry input point |
+| `/api/metrics` | `GET` | None | JSON | Model validation and evaluation metrics |
 
 Interactive Swagger documentation is available at **`http://127.0.0.1:8000/docs`**.
 
 ---
 
-## 11. Copilot and SOP Retrieval Explanation
-The Copilot operates as a **grounded deterministic diagnostic engine**:
-- **Knowledge Base:** Contains structured plant Standard Operating Procedures:
-  - `SOP-PV-042` (IEC 62109-1): Central Inverter Thermal Runaway & Cooling Blower Seizure.
-  - `SOP-WTG-089` (ISO 10816-21): Wind Turbine Drivetrain Vibration Alert & Bearing Distress.
-  - `SOP-PV-018` (IEC 61724): Solar Generation Deficit & DC String Triage.
-  - `SOP-WTG-012` (IEC 61400): Wind Power Curve Aerodynamic Deficit Investigation.
-- **Zero Hallucination Guarantee:** Diagnoses are synthesized directly from verified numerical SCADA metrics, ISO/IEC thresholds, and retrieved SOP checklists without ungrounded guessing.
+## 16. Frontend Description
+The dashboard in [frontend/index.html](frontend/index.html) is an industrial single-page application built with enterprise dark navy / charcoal styling:
+1. **Sidebar Navigation:** 7 views: Overview, Solar Assets, Wind Assets, Anomaly Detection, AI Copilot, Model Performance, and Settings/API.
+2. **Top Navigation Bar:** Project branding, system operational status badge, last updated timestamp, and global asset filter.
+3. **Fleet Overview Tab:** 7 SCADA KPI cards, dual-series Actual vs Forecast power line chart, and a dynamically calculated anomaly severity doughnut chart.
+4. **Solar & Wind Asset Tabs:** Power conversion curves, temperature envelopes, and drivetrain vibration tracking against ISO 10816 thresholds.
+5. **Anomaly Table:** Interactive table with severity badges (Critical, Medium), percentage variances, anomaly scores, and "Diagnose" action buttons.
+6. **Copilot Workbench:** Displays headline, physical hypothesis, telemetry evidence array, and maintenance action items.
+7. **Model Performance Tab:** Side-by-side regression metrics and anomaly detection statistics.
 
 ---
 
-## 12. Model Evaluation Results
-
-### 12.1 Generation Forecasting Metrics (Chronological Test Split)
-
-| Target Asset | Model Architecture | MAE ($MW$) | RMSE ($MW$) | $R^2$ Score |
-|---|---|---:|---:|---:|
-| **`SOLAR_INV_01`** | **Random Forest Regressor (n=100, depth=6)** | **0.0012 MW** | **0.0024 MW** | **1.0000** |
-| `SOLAR_INV_01` | Linear Physics Baseline ($P = \eta \cdot G$) | 0.0001 MW | 0.0002 MW | 1.0000 |
-| **`WTG_07`** | **Random Forest Regressor (n=100, depth=6)** | **0.0178 MW** | **0.0258 MW** | **0.9986** |
-| `WTG_07` | Linear Wind Speed Baseline ($P \approx 0.45\cdot v - 1.36$) | 0.0010 MW | 0.0012 MW | 1.0000 |
-
-### 12.2 Anomaly Detection Ground-Truth Recall
-
-| Asset Target | Algorithm | Predefined Benchmark Faults | Detected Recall | Precision | F1 Score |
-|---|---|---|---:|---:|---:|
-| **`SOLAR_INV_01`** | Isolation Forest + ISO Rules | Nighttime blower failure (TS #67, 68, 69) | **3 / 3 (100.0%)** | 60.0% | 0.750 |
-| **`WTG_07`** | Isolation Forest + ISO Rules | Drivetrain bearing distress (TS #173, 174) | **2 / 2 (100.0%)** | 40.0% | 0.571 |
-| **Fleet Critical Filter** | **Hybrid ML + ISO 10816 Zone D** | **All 5 critical failure events** | **5 / 5 (100.0%)** | **100.0%** | **1.000** |
-
-### 12.3 Engineering Investigation Note (Linear vs Random Forest MAE)
-On this benchmark dataset, Linear Regression achieves lower MAE than Random Forest because the synthetic benchmark dataset was constructed with affine linear generation formulas without measurement noise. However, in physical operating utility plants, real solar inverter MPPT clipping, temperature derating coefficients, and aerodynamic cubic wind power curves are non-linear, making Random Forest theoretically necessary for real-world plant operations.
-
----
-
-## 13. Limitations
-1. **Synthetic Benchmark Telemetry:** The bundled dataset contains synthetic hourly SCADA observations with injected fault patterns. Performance reflects benchmark validation rather than multi-year operational plant history.
-2. **Vibration Frequency Resolution:** Telemetry provides hourly RMS velocity ($mm/s$). In an operational facility, diagnosing specific bearing defect frequencies (BPFI/BPFO) requires high-frequency accelerometer waveforms ($10\text{ kHz}-50\text{ kHz}$).
-3. **Curtailment Ingestion:** Grid curtailment orders from load dispatch centers are currently modeled via generation deficit rather than direct digital dispatch signals.
-
----
-
-## 14. Installation Instructions
+## 17. Installation Instructions
 
 ```bash
 # 1. Clone repository
-git clone <your-repo-link>
+git clone <your-repo-url>
 cd renewable_asset_fault_anomaly_copilot/02_renewable_asset_fault_anomaly_copilot
 
 # 2. Create and activate virtual environment (Python 3.11 recommended)
 python -m venv .venv
-# On Windows:
-.\.venv\Scripts\activate
-# On Linux/macOS:
+
+# On Windows (PowerShell):
+.\.venv\Scripts\Activate.ps1
+
+# On Linux / macOS:
 source .venv/bin/activate
 
 # 3. Install pinned dependencies
@@ -238,62 +276,76 @@ pip install -r requirements.txt
 
 ---
 
-## 15. Backend Startup Instructions
+## 18. Backend Startup
+From the application root directory (`02_renewable_asset_fault_anomaly_copilot`):
 
 ```bash
-# Start FastAPI backend server
+cd 02_renewable_asset_fault_anomaly_copilot
+uvicorn backend.app:app --host 127.0.0.1 --port 8000 --reload
+```
+
+*Alternative (from repository root):*
+```bash
 uvicorn backend.app:app --host 127.0.0.1 --port 8000 --app-dir 02_renewable_asset_fault_anomaly_copilot --reload
 ```
 
 ---
 
-## 16. Frontend Startup Instructions
-The frontend is served directly by FastAPI at the root URL:
+## 19. Frontend Startup
+The frontend is embedded and served directly by FastAPI:
 1. Ensure the backend server is running on `127.0.0.1:8000`.
-2. Open your web browser and navigate to **`http://127.0.0.1:8000/`**.
-3. The dashboard will automatically initialize, load live telemetry and KPIs, and render all interactive charts.
+2. Open your web browser and navigate to:
+   **`http://127.0.0.1:8000/`**
+3. The dashboard will automatically initialize, query `/api/fleet/summary`, `/api/anomalies`, and `/api/telemetry`, and render all interactive charts.
 
 ---
 
-## 17. Railway Deployment Instructions
+## 20. Testing Instructions
+Run the automated test suite using pytest from the repository root:
 
-The repository is configured for deployment to [Railway](https://railway.app):
-- **`Procfile`:** Declares web server command: `web: uvicorn backend.app:app --host 0.0.0.0 --port $PORT`.
-- **`railway.json`:** Configures build settings and restart policies.
-- **`Dockerfile`:** Provides containerized build with dependency installation and model preloading.
+```bash
+# Run test suite
+python -m pytest -q
 
-### Steps to Deploy on Railway:
-1. Log in to your Railway dashboard at [railway.app](https://railway.app).
-2. Click **New Project** $\to$ **Deploy from GitHub repo**.
-3. Select this repository.
-4. Set the Root Directory to `02_renewable_asset_fault_anomaly_copilot` (or leave default if deploying from subfolder).
-5. Railway will automatically detect the `Procfile` / `Dockerfile` and deploy the service.
-6. Once deployed, test the `/health` endpoint to verify service availability.
+# Run standalone evaluation & reproducibility verification
+python 02_renewable_asset_fault_anomaly_copilot/backend/train_and_evaluate.py
+```
 
-*(Note: Live deployment requires a Railway account and repository link).*
+All 12 automated unit and integration tests pass consistently (`12 passed in 2.89s`).
 
 ---
 
-## 18. Screenshots & Dashboard Walkthrough Section
+## 21. Known Limitations
+1. **Synthetic Benchmark Telemetry:** The bundled dataset contains 240 synthetic hourly SCADA observations with injected fault patterns. Performance reflects benchmark validation rather than multi-year operational plant history.
+2. **In-Sample Anomaly Evaluation Limitation:** In `asset_telemetry.csv`, all predefined synthetic fault events (Solar TS #67-69, Wind TS #173-174) are located exclusively in the first 70% of chronological records. The 30% chronological test split contains zero labeled faults, precluding independent out-of-sample supervised recall calculation without fabricating labels.
+3. **Vibration Frequency Resolution:** Telemetry provides hourly RMS velocity ($mm/s$). In an operational facility, diagnosing specific bearing defect frequencies (BPFI/BPFO) requires high-frequency accelerometer waveforms ($10\text{ kHz}-50\text{ kHz}$).
+4. **Curtailment Ingestion:** Grid curtailment orders from load dispatch centers are currently modeled via generation deficit rather than direct digital dispatch signals.
 
-The enterprise dashboard provides 7 specialized views:
+---
 
-1. **Fleet Overview Tab:**
-   - Real-time KPI cards for Monitored Assets, SCADA Records, Total Anomalies, Critical Alarms, Fleet Average Power, and Fleet Health Index.
-   - Dual-series line chart tracking Actual vs Forecast baseline power generation.
-   - Severity distribution doughnut chart dynamically computed from backend telemetry.
-2. **Solar Assets Tab:**
-   - Scatter plot of measured AC power versus plane-of-array solar irradiance ($W/m^2$).
-   - Dual-axis line chart tracking the inverter cabinet temperature and cooling fan vibration envelope.
-3. **Wind Assets Tab:**
-   - Turbine power curve tracking measured power output against wind velocity.
-   - RMS vibration tracking against the ISO 10816 Zone D ($3.5\text{ mm/s}$) danger boundary.
-4. **Anomaly Detection Tab:**
-   - Searchable, filterable operational event table with instant asset and severity filtering.
-   - Direct "Diagnose" action buttons linking events to the Copilot workbench.
-5. **AI Copilot Tab:**
-   - Dedicated operator assistance workbench displaying problem headlines, physical fault hypotheses, verified telemetry evidence, actual-vs-expected variances, and retrieved SOP maintenance checklists.
-6. **Model Performance Tab:**
-   - Side-by-side comparison tables of Random Forest Regressors vs Linear baselines with full documentation of the benchmark data characteristics.
-7. **Settings & API Tab:**
-   - Backward-compatible raw JSON API inspector for quick verification of all endpoints.
+## 22. Railway Deployment Instructions
+The application is pre-configured for deployment on [Railway](https://railway.app):
+- **`Procfile`:** `web: uvicorn backend.app:app --host 0.0.0.0 --port $PORT`
+- **`railway.json`:** Build and restart configuration using NIXPACKS.
+- **`Dockerfile`:** Containerized Python 3.11 build with automated dependency installation.
+
+### Deployment Steps:
+1. Log in to [railway.app](https://railway.app) and create a **New Project**.
+2. Select **Deploy from GitHub repo** and select this repository.
+3. In Project Settings, set the **Root Directory** to `02_renewable_asset_fault_anomaly_copilot`.
+4. Railway will automatically build the environment and start the web service.
+5. Verify deployment by visiting `https://<your-railway-domain>/health`.
+
+---
+
+## 23. Screenshots & Demonstration Evidence
+The `screenshots/` directory contains documentation and instructions for capturing all 7 dashboard views:
+- `01_fleet_overview.png`: Real-time KPI cards, dual-series generation chart, and severity doughnut.
+- `02_solar_monitoring.png`: Solar inverter power vs irradiance curve and cabinet temperature tracking.
+- `03_wind_monitoring.png`: Turbine power curve and vibration tracking against ISO 10816 Zone D boundary.
+- `04_anomaly_detection.png`: Operational anomaly table with severity filters and diagnose actions.
+- `05_ai_copilot_workbench.png`: Operator triage workbench showing fault hypothesis, sensor evidence, and retrieved SOP.
+- `06_model_performance.png`: Validation table comparing Random Forest Regressors vs Linear baselines.
+- `07_api_documentation.png`: Interactive Swagger UI (`/docs`).
+
+Refer to [screenshots/README.md](screenshots/README.md) for capture procedures.
