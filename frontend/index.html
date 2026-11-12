@@ -260,33 +260,33 @@
 
     /* Container */
     .content-body {
-      padding: 28px;
+      padding: 16px 24px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 16px;
       max-width: 1440px;
       width: 100%;
     }
 
     /* Tab Views */
     .tab-view { display: none; }
-    .tab-view.active { display: flex; flex-direction: column; gap: 24px; animation: fadeIn 0.25s ease; }
+    .tab-view.active { display: flex; flex-direction: column; gap: 18px; animation: fadeIn 0.25s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
     /* KPI Cards Grid */
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
     }
     .kpi-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 18px 20px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
       position: relative;
       overflow: hidden;
       transition: transform var(--transition-fast), border-color var(--transition-fast);
@@ -296,20 +296,20 @@
       border-color: var(--accent-green);
     }
     .kpi-label {
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 11px;
+      font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
     .kpi-value {
-      font-size: 26px;
+      font-size: 20px;
       font-weight: 800;
       color: var(--text-main);
       letter-spacing: -0.02em;
     }
     .kpi-subtext {
-      font-size: 11px;
+      font-size: 10.5px;
       color: var(--text-dim);
       display: flex;
       align-items: center;
@@ -325,21 +325,123 @@
     .badge-critical { background: var(--critical-bg); color: var(--critical-red); border: 1px solid rgba(239,68,68,0.3); }
     .badge-warning { background: var(--warning-bg); color: var(--warning-amber); border: 1px solid rgba(245,158,11,0.3); }
     .badge-success { background: var(--accent-green-glow); color: var(--accent-green); border: 1px solid rgba(16,185,129,0.3); }
+    .badge-llm {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(59, 130, 246, 0.22));
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+    }
+    .badge-sop {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .badge-hypothesis {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: var(--radius-sm);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      margin-right: 6px;
+      flex-shrink: 0;
+    }
+    .tier-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .tier-badge-ml {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+    .tier-badge-sop {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .tier-badge-llm {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .copilot-tier {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg-surface-elevated);
+    }
+    .copilot-tier-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 6px;
+    }
+    .copilot-questions-list {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .copilot-questions-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #cbd5e1;
+    }
+    .copilot-questions-list li::before {
+      content: "?";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      font-weight: 700;
+      font-size: 10px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .contributing-factor-item {
+      display: flex;
+      align-items: flex-start;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--text-main);
+      padding: 3px 0;
+    }
 
     /* Charts Section Grid */
     .chart-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
-      gap: 20px;
+      gap: 14px;
     }
     .card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 20px;
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
     }
     .card-header {
       display: flex;
@@ -347,55 +449,55 @@
       align-items: center;
     }
     .card-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       letter-spacing: -0.01em;
       color: var(--text-main);
     }
     .card-subtitle {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--text-muted);
       margin-top: 2px;
     }
     .chart-container {
       position: relative;
       width: 100%;
-      height: 280px;
+      height: 220px;
     }
 
     /* Asset Grid Cards */
     .asset-cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
     }
     .asset-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 22px;
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 10px;
     }
     .asset-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
     }
-    .asset-id { font-size: 17px; font-weight: 700; }
-    .asset-type { font-size: 12px; color: var(--text-muted); }
+    .asset-id { font-size: 15px; font-weight: 700; }
+    .asset-type { font-size: 11.5px; color: var(--text-muted); }
     .asset-metrics-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      padding: 12px;
+      gap: 8px;
+      padding: 8px 12px;
       background: var(--bg-surface-elevated);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
     }
     .metric-box { display: flex; flex-direction: column; gap: 2px; }
-    .metric-name { font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; }
-    .metric-val { font-size: 14.5px; font-weight: 700; }
+    .metric-name { font-size: 9.5px; color: var(--text-dim); text-transform: uppercase; }
+    .metric-val { font-size: 13.5px; font-weight: 700; }
 
     /* Tables */
     .table-container {
@@ -409,24 +511,25 @@
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      font-size: 12.5px;
+      font-size: 12px;
     }
     table.data-table th {
       background: var(--bg-surface-elevated);
-      padding: 12px 14px;
+      padding: 9px 12px;
       font-weight: 600;
       color: var(--text-muted);
       border-bottom: 1px solid var(--border-subtle);
       white-space: nowrap;
       text-transform: uppercase;
-      font-size: 11px;
+      font-size: 10.5px;
       letter-spacing: 0.03em;
     }
     table.data-table td {
-      padding: 12px 14px;
+      padding: 8px 12px;
       border-bottom: 1px solid var(--border-subtle);
       color: var(--text-main);
       white-space: nowrap;
+      font-size: 11.5px;
     }
     table.data-table tr:hover td {
       background: var(--bg-surface-hover);
@@ -931,11 +1034,20 @@
       <!-- ================= TAB 5: AI COPILOT ================= -->
       <section class="tab-view" id="tab-copilot">
         <div class="card" style="border:none;background:transparent;padding:0">
-          <div style="margin-bottom:12px">
-            <h2 style="font-size:18px;font-weight:700">Greenko Renewable Asset AI Copilot</h2>
-            <p style="font-size:12.5px;color:var(--text-muted)">
-              Grounded Operator Assistance Engine combining multi-sensor SCADA analytics, ISO 10816 / IEC standards, and plant SOP checklists.
-            </p>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+            <div>
+              <h2 style="font-size:18px;font-weight:700">Greenko Renewable Asset AI Copilot</h2>
+              <p style="font-size:12.5px;color:var(--text-muted)">
+                Multi-tier Grounded Operator Assistance: Ground-Truth ML Anomaly Detection + Domain SOP Rules + Google Gemini GenAI Synthesis.
+              </p>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:11.5px;color:var(--text-muted)">Inference Engine:</span>
+              <select class="filter-select" id="copilotEngineSelect" onchange="onCopilotEngineChange()">
+                <option value="auto">✨ Gemini 2.5 Flash (GenAI / Auto)</option>
+                <option value="deterministic">⚙️ Rule-Based SOP (Deterministic)</option>
+              </select>
+            </div>
           </div>
 
           <div class="copilot-container">
@@ -960,43 +1072,88 @@
                 <span class="kpi-badge badge-critical" id="cpSeverityBadge">CRITICAL ALERT</span>
                 <span class="system-status-pill" id="cpAssetPill">SOLAR_INV_01</span>
                 <span style="font-size:12px;color:var(--text-dim)" id="cpTimestampLabel">Timestamp #67 (Hour 19:00)</span>
+                <span class="kpi-badge badge-llm" id="cpEngineBadge">✨ GenAI (gemini-2.5-flash)</span>
+              </div>
+
+              <!-- Fallback Banner -->
+              <div id="cpFallbackBanner" style="display:none;padding:10px 14px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-sm);font-size:12px;color:#fcd34d;line-height:1.4">
+                ⚙️ <strong>Deterministic Fallback Active:</strong> LLM API key not configured or request timed out. Showing verified ground-truth ML analytics and IEC/ISO domain standard operating procedure.
               </div>
 
               <div>
-                <h3 style="font-size:18px;font-weight:700;line-height:1.3" id="cpHeadline">CRITICAL THERMAL/MECHANICAL ANOMALY on SOLAR_INV_01 at Hour 19:00</h3>
-                <p style="font-size:13.5px;color:var(--text-muted);line-height:1.5;margin-top:8px" id="cpFaultHypothesis">
-                  Analyzing telemetry...
+                <h3 style="font-size:17px;font-weight:700;line-height:1.3" id="cpHeadline">CRITICAL THERMAL/MECHANICAL ANOMALY on SOLAR_INV_01 at Hour 19:00</h3>
+                <p style="font-size:12.5px;color:#93c5fd;line-height:1.4;margin-top:4px" id="cpSeveritySummary">
+                  Analyzing operational severity...
                 </p>
               </div>
 
-              <!-- Telemetry Evidence Section -->
-              <div class="copilot-section">
-                <div class="copilot-section-title">Telemetry Sensor Evidence</div>
-                <ul class="copilot-checklist" id="cpEvidenceList">
-                  <li>Loading verified telemetry evidence...</li>
-                </ul>
-              </div>
-
-              <!-- Variance Analysis -->
-              <div class="copilot-section">
-                <div class="copilot-section-title">Actual vs Expected Generation Variance</div>
-                <div style="font-size:13px;line-height:1.5;color:#e2e8f0" id="cpVarianceAnalysis">
-                  Calculating variance...
+              <!-- TIER 1: VERIFIED ML GROUND TRUTH -->
+              <div class="copilot-tier" style="border-color:rgba(59,130,246,0.3)">
+                <div class="copilot-tier-header">
+                  <div class="copilot-section-title" style="color:#60a5fa">Tier 1: Ground-Truth SCADA Telemetry & ML Isolation Forest</div>
+                  <span class="tier-badge tier-badge-ml">✓ Verified ML (Immutable)</span>
+                </div>
+                <div>
+                  <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Sensor Evidence:</div>
+                  <ul class="copilot-checklist" id="cpEvidenceList">
+                    <li>Loading verified telemetry evidence...</li>
+                  </ul>
+                </div>
+                <div style="margin-top:6px;border-top:1px dashed var(--border-subtle);padding-top:8px">
+                  <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:4px">Generation Variance Baseline:</div>
+                  <div style="font-size:12px;line-height:1.4;color:#e2e8f0" id="cpVarianceAnalysis">
+                    Calculating variance...
+                  </div>
                 </div>
               </div>
 
-              <!-- Field Action Checklist -->
-              <div class="copilot-section">
-                <div class="copilot-section-title">Recommended Operator & Maintenance Checklist</div>
-                <ul class="copilot-checklist" id="cpChecklist">
-                  <li>Loading standard operating procedure...</li>
-                </ul>
+              <!-- TIER 2: DOMAIN SOP RULES -->
+              <div class="copilot-tier" style="border-color:rgba(245,158,11,0.3)">
+                <div class="copilot-tier-header">
+                  <div class="copilot-section-title" style="color:#fbbf24">Tier 2: Industrial Domain Rules & Standard Operating Procedures</div>
+                  <span class="tier-badge tier-badge-sop">⚙️ SOP Grounded</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted)">
+                  Governing Standard: <strong style="color:#fde68a" id="cpSopStandard">IEC 62109-1 / SOP-PV-042</strong>
+                </div>
+                <div style="margin-top:4px">
+                  <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Standard Field Maintenance Checklist:</div>
+                  <ul class="copilot-checklist" id="cpChecklist">
+                    <li>Loading standard operating procedure...</li>
+                  </ul>
+                </div>
               </div>
 
-              <!-- SOP Standard Reference & Safeguard Badge -->
-              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-dim);border-top:1px solid var(--border-subtle);padding-top:12px;flex-wrap:wrap;gap:8px">
-                <div>Standard: <strong style="color:var(--text-muted)" id="cpSopStandard">IEC 62109-1 / SOP-PV-042</strong></div>
-                <div style="color:var(--accent-green)">✓ Grounded Deterministic Physics Engine (Zero Hallucination)</div>
+              <!-- TIER 3: GENAI SYNTHESIS -->
+              <div class="copilot-tier" style="border-color:rgba(16,185,129,0.35);background:rgba(16,185,129,0.04)">
+                <div class="copilot-tier-header">
+                  <div class="copilot-section-title" style="color:#34d399">Tier 3: GenAI Operator Synthesis & Investigation Hypotheses</div>
+                  <span class="tier-badge tier-badge-llm">✨ Google Gemini Synthesis</span>
+                </div>
+                <div>
+                  <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:4px">Operator Summary & Diagnostic Thesis:</div>
+                  <p style="font-size:12.5px;color:var(--text-main);line-height:1.5" id="cpFaultHypothesis">
+                    Analyzing telemetry...
+                  </p>
+                </div>
+                <div style="margin-top:6px;border-top:1px dashed var(--border-subtle);padding-top:8px">
+                  <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Potential Contributing Factors (Engineering Hypotheses):</div>
+                  <div id="cpHypothesesList" style="display:flex;flex-direction:column;gap:4px">
+                    <!-- Populated via JS with [Hypothesis] badges -->
+                  </div>
+                </div>
+                <div style="margin-top:6px;border-top:1px dashed var(--border-subtle);padding-top:8px">
+                  <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Recommended Operator Follow-Up Questions (Field Triage):</div>
+                  <ul class="copilot-questions-list" id="cpQuestionsList">
+                    <!-- Populated via JS -->
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Safeguard Notice -->
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-dim);border-top:1px solid var(--border-subtle);padding-top:8px;flex-wrap:wrap;gap:8px">
+                <div style="color:var(--accent-green)">✓ Grounded SCADA Truth Guardrail: LLM cannot mutate sensor readings or ML anomaly scores.</div>
+                <div style="color:var(--text-dim)">Strict Hypothesis Labeling Enforced</div>
               </div>
             </div>
           </div>
@@ -1391,12 +1548,19 @@
       }
     }
 
+    let currentSelectedAsset = 'SOLAR_INV_01';
+    let currentSelectedTimestamp = 67;
+
     async function loadCopilotDetails(assetId, timestampId, customQuery = '') {
+      currentSelectedAsset = assetId;
+      currentSelectedTimestamp = timestampId;
+      const engineMode = document.getElementById('copilotEngineSelect')?.value || 'auto';
       try {
         const body = {
           text: customQuery || `Diagnose operational anomaly for ${assetId} at timestamp ${timestampId}`,
           asset_id: assetId,
-          timestamp_id: timestampId
+          timestamp_id: timestampId,
+          mode: engineMode
         };
         const res = await fetch('/api/run', {
           method: 'POST',
@@ -1406,29 +1570,104 @@
         const data = await res.json();
         const exp = data.copilot_explanation;
 
+        // Render badges
         document.getElementById('cpSeverityBadge').textContent = exp.severity;
         document.getElementById('cpSeverityBadge').className = `kpi-badge ${exp.severity === 'CRITICAL' ? 'badge-critical' : 'badge-warning'}`;
         document.getElementById('cpAssetPill').textContent = data.asset_analyzed;
         document.getElementById('cpTimestampLabel').textContent = `Timestamp #${timestampId || 'N/A'}`;
+
+        // Engine source badge
+        const engineBadge = document.getElementById('cpEngineBadge');
+        if (engineBadge) {
+          if (exp.source === 'llm') {
+            engineBadge.className = 'kpi-badge badge-llm';
+            engineBadge.innerHTML = `✨ GenAI (${exp.model_name})`;
+          } else {
+            engineBadge.className = 'kpi-badge badge-sop';
+            engineBadge.innerHTML = `⚙️ SOP (${exp.model_name || 'Rule-Based'})`;
+          }
+        }
+
+        // Fallback banner
+        const fallbackBanner = document.getElementById('cpFallbackBanner');
+        if (fallbackBanner) {
+          if (exp.fallback_used) {
+            fallbackBanner.style.display = 'block';
+            fallbackBanner.innerHTML = '⚙️ <strong>Deterministic Fallback Active:</strong> LLM API key not configured or request timed out. Showing verified ground-truth ML analytics and IEC/ISO domain standard operating procedure.';
+          } else {
+            fallbackBanner.style.display = 'none';
+          }
+        }
+
+        // Headline & Severity Summary
         document.getElementById('cpHeadline').textContent = exp.headline;
-        document.getElementById('cpFaultHypothesis').textContent = exp.fault_hypothesis;
-        document.getElementById('cpVarianceAnalysis').textContent = exp.variance_analysis;
-        document.getElementById('cpSopStandard').textContent = exp.retrieved_sop_standard;
+        const sevSummary = document.getElementById('cpSeveritySummary');
+        if (sevSummary) {
+          sevSummary.textContent = exp.severity_summary || (exp.severity === 'CRITICAL' ? 'Immediate operator field triage mandated.' : 'Advisory monitoring recommended.');
+        }
 
+        // Tier 1: ML Telemetry Evidence & Variance
         const evidenceUl = document.getElementById('cpEvidenceList');
-        evidenceUl.innerHTML = exp.telemetry_evidence.map(e => `<li>${e}</li>`).join('');
+        if (evidenceUl && exp.telemetry_evidence) {
+          evidenceUl.innerHTML = exp.telemetry_evidence.map(e => `<li>${e}</li>`).join('');
+        }
+        const varElem = document.getElementById('cpVarianceAnalysis');
+        if (varElem) {
+          varElem.textContent = exp.variance_analysis;
+        }
 
+        // Tier 2: SOP Standard & Checklist
+        const sopElem = document.getElementById('cpSopStandard');
+        if (sopElem) {
+          sopElem.textContent = exp.retrieved_sop_standard;
+        }
         const checkUl = document.getElementById('cpChecklist');
-        checkUl.innerHTML = exp.recommended_checks.map(c => `<li>${c}</li>`).join('');
+        if (checkUl && exp.recommended_checks) {
+          checkUl.innerHTML = exp.recommended_checks.map(c => `<li>${c}</li>`).join('');
+        }
+
+        // Tier 3: Hypotheses & Follow-up Questions
+        const hypoElem = document.getElementById('cpFaultHypothesis');
+        if (hypoElem) {
+          hypoElem.textContent = exp.fault_hypothesis;
+        }
+
+        const hypContainer = document.getElementById('cpHypothesesList');
+        if (hypContainer) {
+          const factors = exp.potential_contributing_factors && exp.potential_contributing_factors.length > 0
+            ? exp.potential_contributing_factors
+            : [exp.fault_hypothesis];
+          hypContainer.innerHTML = factors.map(f => `
+            <div class="contributing-factor-item">
+              <span class="badge-hypothesis">[Hypothesis]</span>
+              <span>${f}</span>
+            </div>
+          `).join('');
+        }
+
+        const qContainer = document.getElementById('cpQuestionsList');
+        if (qContainer) {
+          const questions = exp.operator_follow_up_questions && exp.operator_follow_up_questions.length > 0
+            ? exp.operator_follow_up_questions
+            : [
+                'Have visual inspections of cooling fans or lubrication seals been completed in the last 24 hours?',
+                'Are SCADA inverter/generator diagnostic trouble codes (DTCs) present in the sub-station log?'
+              ];
+          qContainer.innerHTML = questions.map(q => `<li>${q}</li>`).join('');
+        }
       } catch (err) {
         console.error('Failed to load copilot details:', err);
       }
     }
 
+    function onCopilotEngineChange() {
+      loadCopilotDetails(currentSelectedAsset, currentSelectedTimestamp);
+    }
+
     function submitCustomCopilotQuery() {
       const q = document.getElementById('copilotQueryInput').value.trim();
       if (!q) return;
-      loadCopilotDetails('SOLAR_INV_01', 67, q);
+      loadCopilotDetails(currentSelectedAsset || 'SOLAR_INV_01', currentSelectedTimestamp || 67, q);
     }
 
     function computeSeverityDistribution(anomalies, telemetry, assetFilter = 'ALL') {

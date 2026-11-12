@@ -80,12 +80,28 @@ def generate_copilot_explanation(
                 f"active power conversion indicates forced-air cooling fan motor bearing seizure, intake dust filter "
                 f"blockage, or auxiliary power transformer resonance."
             )
+            potential_factors = [
+                "[Hypothesis] Forced-air cooling fan motor bearing seizure or impeller mechanical rub",
+                "[Hypothesis] Inverter cabinet intake filter dust clogging restricting convective airflow",
+                "[Hypothesis] Auxiliary control power transformer internal winding insulation degradation"
+            ]
+            questions = [
+                "Has the inverter enclosure air filter been cleaned or replaced within the last 30 days?",
+                "Are auxiliary cooling circuit breaker trip flags or high-temperature alarms logged in SCADA?",
+                "Does an infrared thermographic scan reveal localized hotspotting on IGBT heat sinks?"
+            ]
         else:
             headline = f"Operational Status Notice for {asset_id} at Hour {hour:02d}:00"
             fault_hypothesis = (
                 f"Asset {asset_id} is operating within tolerable limits with minor deviation. "
                 f"Actual power matches expected generation profile within margin of error."
             )
+            potential_factors = [
+                "[Hypothesis] Normal thermal dissipation following daytime diurnal generation cycle"
+            ]
+            questions = [
+                "Is the inverter cabinet ambient temperature within nominal seasonal boundaries?"
+            ]
     else:  # Wind WTG
         if severity == "CRITICAL" or vibration_mm_s > 3.5:
             headline = f"CRITICAL DRIVETRAIN VIBRATION & THERMAL ALERT on {asset_id} at Hour {hour:02d}:00"
@@ -96,12 +112,34 @@ def generate_copilot_explanation(
                 f"strongly indicates generator drive-end bearing spalling, gearbox high-speed shaft distress, or "
                 f"lubrication line starvation."
             )
+            potential_factors = [
+                "[Hypothesis] Generator drive-end bearing race spalling or mechanical roller pitting",
+                "[Hypothesis] Gearbox high-speed shaft mechanical misalignment or elastomeric coupling fatigue",
+                "[Hypothesis] Drivetrain forced lubrication line starvation or lube oil filter clogging"
+            ]
+            questions = [
+                "When was the latest lubrication oil sample analyzed, and did particle counters show wear debris?",
+                "Does the high-frequency vibration spectrum reveal bearing defect frequencies (BPFO/BPFI)?",
+                "Has rotor blade pitch angle calibration or aerodynamic imbalance been verified recently?"
+            ]
         else:
             headline = f"Drivetrain Performance Report for {asset_id} at Hour {hour:02d}:00"
             fault_hypothesis = (
                 f"Asset {asset_id} drivetrain operating within ISO 10816 Zone A/B vibration limits. "
                 f"Power generation is tracking the expected aerodynamic power curve."
             )
+            potential_factors = [
+                "[Hypothesis] Normal mechanical drivetrain operation under current wind turbulence intensity"
+            ]
+            questions = [
+                "Are nacelle anemometer and wind vane readings aligned with adjacent turbine met-mast data?"
+            ]
+
+    severity_summary = (
+        f"Operational Risk: {severity}. Immediate field triage and LOTO safety inspection mandated under {sop['id']}."
+        if severity == "CRITICAL"
+        else f"Operational Risk: {severity}. Routine monitoring and scheduled maintenance inspection under {sop['id']}."
+    )
 
     return CopilotExplanation(
         headline=headline,
@@ -112,5 +150,8 @@ def generate_copilot_explanation(
         variance_analysis=variance_str,
         recommended_checks=sop["recommended_operator_actions"],
         retrieved_sop_standard=f"{sop['id']} ({sop['standard_reference']}): {sop['title']}",
-        safeguard_note="Engineering Guardrail: Output strictly derived from verified sensor limits, ISO 10816/IEC standards, and scikit-learn models."
+        safeguard_note="Engineering Guardrail: Output strictly derived from verified sensor limits, ISO 10816/IEC standards, and scikit-learn models.",
+        severity_summary=severity_summary,
+        potential_contributing_factors=potential_factors,
+        operator_follow_up_questions=questions
     )

@@ -549,11 +549,11 @@ class RenewableAssetPipeline:
             'severity': severity
         }
 
-    def run_copilot_case(self, query_text: str, asset_id: Optional[str] = None, timestamp_id: Optional[int] = None) -> PipelineRunResponse:
+    def run_copilot_case(self, query_text: str = "", asset_id: Optional[str] = None, timestamp_id: Optional[int] = None, mode: str = "auto") -> PipelineRunResponse:
         """
         Executes end-to-end case:
         Filters anomalies, selects the representative event,
-        and generates an operator-friendly GenAI explanation.
+        and generates an operator-friendly GenAI explanation with deterministic fallback.
         """
         anomalies = self.get_detected_anomalies()
         target_asset = asset_id or ('WTG_07' if 'wind' in query_text.lower() or 'wtg' in query_text.lower() else 'SOLAR_INV_01')
@@ -567,7 +567,9 @@ class RenewableAssetPipeline:
         else:
             selected = next((a for a in filtered if a.severity == 'CRITICAL'), filtered[0])
 
-        explanation = generate_copilot_explanation(
+        from backend.llm_service import generate_llm_explanation
+
+        explanation = generate_llm_explanation(
             asset_id=selected.asset_id,
             hour=selected.hour,
             temperature_c=selected.temperature_c,
@@ -578,7 +580,8 @@ class RenewableAssetPipeline:
             variance_pct=selected.variance_pct,
             anomaly_score=selected.anomaly_score,
             timestamp_id=selected.timestamp_id,
-            user_query=query_text
+            user_query=query_text,
+            force_mode=mode
         )
 
         return PipelineRunResponse(

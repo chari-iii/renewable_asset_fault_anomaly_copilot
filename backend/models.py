@@ -17,6 +17,7 @@ class Query(BaseModel):
     text: str = Field(default="", description="Natural language prompt or query for the copilot")
     asset_id: Optional[str] = Field(default=None, description="Optional target asset ID (SOLAR_INV_01 or WTG_07)")
     timestamp_id: Optional[int] = Field(default=None, description="Optional specific timestamp ID to inspect")
+    mode: Optional[str] = Field(default="auto", description="Explanation mode: auto, llm, or deterministic")
 
 
 class PredictionRequest(BaseModel):
@@ -54,6 +55,12 @@ class CopilotExplanation(BaseModel):
     recommended_checks: List[str]
     retrieved_sop_standard: str
     safeguard_note: str
+    source: str = "DETERMINISTIC_SOP"
+    fallback_used: bool = False
+    model_name: Optional[str] = None
+    severity_summary: Optional[str] = None
+    potential_contributing_factors: List[str] = Field(default_factory=list)
+    operator_follow_up_questions: List[str] = Field(default_factory=list)
 
 
 class PipelineRunResponse(BaseModel):

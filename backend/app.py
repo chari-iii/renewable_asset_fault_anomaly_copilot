@@ -142,9 +142,14 @@ def demo():
 
 
 @app.get("/api/run")
-def run_case_get(text: str = "", asset_id: Optional[str] = None, timestamp_id: Optional[int] = None):
+def run_case_get(
+    text: str = "",
+    asset_id: Optional[str] = None,
+    timestamp_id: Optional[int] = None,
+    mode: str = FastQuery(default="auto", description="Explanation mode: auto, llm, or deterministic")
+):
     """Allows direct browser GET requests to test the copilot pipeline."""
-    return run_case(Query(text=text, asset_id=asset_id, timestamp_id=timestamp_id))
+    return run_case(Query(text=text, asset_id=asset_id, timestamp_id=timestamp_id, mode=mode))
 
 
 @app.post("/api/run")
@@ -158,11 +163,46 @@ def run_case(query: Query):
         response = pipeline.run_copilot_case(
             query_text=query.text,
             asset_id=query.asset_id,
-            timestamp_id=query.timestamp_id
+            timestamp_id=query.timestamp_id,
+            mode=query.mode or "auto"
         )
         return response.model_dump()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/copilot/explain")
+def copilot_explain_get(
+    asset_id: Optional[str] = None,
+    timestamp_id: Optional[int] = None,
+    query_text: str = "",
+    mode: str = "auto"
+):
+    """Dedicated GenAI / deterministic copilot explanation endpoint (GET)."""
+    res = pipeline.run_copilot_case(query_text=query_text, asset_id=asset_id, timestamp_id=timestamp_id, mode=mode)
+    return {
+        "status": "SUCCESS",
+        "asset_analyzed": res.asset_analyzed,
+        "copilot_explanation": res.copilot_explanation.model_dump(),
+        "query": res.query
+    }
+
+
+@app.post("/api/copilot/explain")
+def copilot_explain_post(query: Query):
+    """Dedicated GenAI / deterministic copilot explanation endpoint (POST)."""
+    res = pipeline.run_copilot_case(
+        query_text=query.text,
+        asset_id=query.asset_id,
+        timestamp_id=query.timestamp_id,
+        mode=query.mode or "auto"
+    )
+    return {
+        "status": "SUCCESS",
+        "asset_analyzed": res.asset_analyzed,
+        "copilot_explanation": res.copilot_explanation.model_dump(),
+        "query": res.query
+    }
 
 
 @app.get("/api/anomalies", response_model=List[AnomalyItem])

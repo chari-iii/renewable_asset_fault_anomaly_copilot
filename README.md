@@ -28,11 +28,12 @@ In renewable energy plant control rooms and field substations:
 ---
 
 ## 4. Technology Stack
+- **GenAI & LLM Service:** Google Gemini API via official `google-genai` Python SDK (3.2.0), default model: `gemini-2.5-flash`.
 - **Backend Framework:** FastAPI (0.115.0), Starlette (0.38.6), Uvicorn (0.30.6).
 - **Data Validation & Schemas:** Pydantic v2 (2.8.2).
 - **Machine Learning & Analytics:** Scikit-Learn (1.5.1), Pandas (2.2.2), NumPy (1.26.4), SciPy (1.17.1), Joblib (1.6.0).
 - **Frontend Dashboard:** HTML5, CSS3 (Enterprise Dark Navy/Charcoal Design System), Vanilla JavaScript (ES6+), Chart.js (4.4.4).
-- **Testing & Quality Assurance:** Pytest (8.0.0+ / 9.2.0), HTTPX (0.28.1).
+- **Testing & Quality Assurance:** Pytest (8.0.0+ / 9.2.0), HTTPX (0.28.1), Mocked LLM unit test suite.
 - **Containerization & Deployment:** Docker, Procfile, Railway configuration (`railway.json`).
 
 ---
@@ -78,16 +79,18 @@ In renewable energy plant control rooms and field substations:
                                            |
                                            v
 +-----------------------------------------------------------------------------------+
-|                       5. Operator Copilot Explanation Layer                       |
-|  * Structured engineering explanation: headline, fault hypothesis, evidence       |
-|  * Deterministic Physics Engine grounded in verified SCADA telemetry & SOPs      |
+|               5. GenAI Copilot Explanation Layer (Google Gemini)                  |
+|  * Official google-genai SDK (gemini-2.5-flash) with structured JSON synthesis    |
+|  * Grounded in verified SCADA telemetry, Isolation Forest anomaly score & SOP     |
+|  * Zero-hallucination guardrail: Strict hypothesis labeling [Hypothesis]          |
+|  * Deterministic SOP Fallback: Seamless offline operation when API key is missing |
 +-----------------------------------------------------------------------------------+
                                            |
                                            v
 +-----------------------------------------------------------------------------------+
 |                 6. FastAPI REST Backend & Modern Enterprise Dashboard             |
-|  * REST Endpoints: /api/fleet/summary, /api/assets, /api/telemetry, /api/sops...  |
-|  * Dark-themed industrial SaaS frontend (Overview, Assets, Anomalies, Copilot)   |
+|  * REST Endpoints: /api/fleet/summary, /api/copilot/explain, /api/run, /api/sops  |
+|  * Multi-Tier UI: Verified ML SCADA + Industrial SOP Rules + GenAI Synthesis      |
 +-----------------------------------------------------------------------------------+
 ```
 
@@ -215,13 +218,44 @@ The Standard Operating Procedure (SOP) retrieval mechanism operates in [backend/
 
 ---
 
-## 14. Copilot Explanation Process
-The Copilot layer in [backend/copilot.py](backend/copilot.py) synthesizes structured operator guidance through four deterministic steps:
-1. **Variance Sign Convention:** Formats $\Delta P = P_{\text{actual}} - P_{\text{expected}}$ where negative values indicate generation deficit/underperformance.
-2. **Telemetry Evidence Assembly:** Compiles verified numerical facts (temperature, vibration, power, weather condition, ISO 10816 zone classification).
-3. **Engineering Hypothesis Formulation:** Connects the multi-sensor signature to physical mechanisms (e.g., cooling blower motor rub or high-speed shaft bearing spalling).
-4. **Checklist Generation:** Returns standard maintenance steps from the retrieved SOP (e.g., FLIR thermal scan, LOTO nacelle inspection, FFT spectrum analysis for BPFO/BPFI defect harmonics).
-5. **Deterministic Safeguard:** Output is strictly derived from verified SCADA limits and standard operating procedures. No external LLM is wired; the system operates with zero external API dependencies.
+## 14. GenAI Copilot & LLM Explanation Architecture
+The Copilot layer incorporates a **hybrid enterprise architecture** combining verified machine learning ground truth with the **Google Gemini API** via the official `google-genai` Python SDK (v3.2.0), implemented in [backend/llm_service.py](backend/llm_service.py) with deterministic fallback in [backend/copilot.py](backend/copilot.py):
+
+### 14.1 LLM Service Specifications
+- **Provider:** Google Gemini API
+- **Model:** `gemini-2.5-flash` (configurable via `GEMINI_MODEL` environment variable)
+- **Official SDK:** `google-genai>=0.1.1` (`from google import genai`)
+- **Authentication:** `GEMINI_API_KEY` environment variable (never exposed in frontend JavaScript, GitHub, or application logs)
+- **Execution Mode:** Multi-mode inference (`auto` for Gemini LLM with automatic fallback, or `deterministic` for rule-based physics SOP).
+
+### 14.2 Grounded Workflow & Guardrails
+The LLM serves as an **explanation and synthesis layer**, strictly prevented from altering analytical findings:
+1. **Verified Structured Context:** The LLM receives verified ML outputs:
+   - Target `asset_id` and asset classification (`SOLAR_CENTRAL_INVERTER` / `WIND_TURBINE_GENERATOR`).
+   - Exact sensor readings (Temperature, Vibration, Power, Irradiance/Wind Speed).
+   - Expected power generation baseline, active variance ($MW$ and $\%$), and sign convention.
+   - Isolation Forest anomaly flag (`True`/`False`), anomaly score, and severity level (`CRITICAL`, `HIGH`, `MEDIUM`, `NORMAL`).
+   - Retrieved engineering SOP standard and maintenance checklist from IEC/ISO domain rules.
+2. **Zero-Hallucination Guardrails:**
+   - **Immutable Ground Truth:** The LLM is instructed never to alter numerical sensor readings or override ML anomaly classifications.
+   - **Hypothesis Labeling:** All suspected technical root causes are explicitly labeled as hypotheses (`[Hypothesis]`) and never presented as confirmed mechanical diagnoses.
+   - **No Invented Documents:** The LLM cannot invent internal Greenko corporate standard numbers or unverified procedures; it grounds recommendations strictly in the supplied engineering context.
+3. **Structured JSON Output Schema:**
+   The prompt enforces strict RFC-8259 JSON output containing:
+   - `headline`: Concise industrial alert title.
+   - `fault_hypothesis`: Primary diagnostic hypothesis.
+   - `severity_summary`: Operational risk summary.
+   - `telemetry_evidence`: List of verified physical telemetry metrics.
+   - `variance_analysis`: Active power deficit analysis.
+   - `recommended_checks`: Ordered, actionable step-by-step field inspection checklist.
+   - `potential_contributing_factors`: Hypotheses badged as `[Hypothesis]`.
+   - `operator_follow_up_questions`: Targeted questions for field technicians.
+
+### 14.3 Deterministic Fallback Resilience
+If `GEMINI_API_KEY` is unset, the API times out (>8.0 seconds), or the remote service returns an error:
+- The system automatically triggers `generate_copilot_explanation()` from `backend/copilot.py`.
+- Sets `fallback_used: True` and `source: "deterministic"`.
+- Returns zero HTTP 500 errors to operators, maintaining continuous control room visibility.
 
 ---
 
@@ -237,10 +271,11 @@ The Copilot layer in [backend/copilot.py](backend/copilot.py) synthesizes struct
 | `/api/telemetry` | `GET` | `asset_id` (optional) | `List[TelemetryPoint]` | Time-series telemetry points for charts |
 | `/api/anomalies` | `GET` | `asset_id`, `severity` | `List[AnomalyItem]` | Filtered list of detected operational anomalies |
 | `/api/sops` | `GET` | None | JSON | Greenko SOP database and industry standards |
-| `/api/demo` | `GET` | None | JSON | Complete end-to-end evaluation payload |
-| `/api/run` | `GET` / `POST` | `Query` (text, asset_id, ts) | `PipelineRunResponse` | Runs copilot case and returns diagnosis |
+| `/api/copilot/explain` | `GET` / `POST` | `asset_id`, `ts`, `mode` | `CopilotExplanation` | Dedicated GenAI Copilot explanation endpoint |
+| `/api/run` | `GET` / `POST` | `Query` (text, asset_id, ts, mode) | `PipelineRunResponse` | Runs copilot case with GenAI/deterministic mode |
 | `/api/predict` | `POST` | `PredictionRequest` | JSON | Evaluates custom telemetry input point |
 | `/api/metrics` | `GET` | None | JSON | Model validation and evaluation metrics |
+| `/api/demo` | `GET` | None | JSON | Complete end-to-end evaluation payload |
 
 Interactive Swagger documentation is available at **`http://127.0.0.1:8000/docs`**.
 
@@ -249,16 +284,20 @@ Interactive Swagger documentation is available at **`http://127.0.0.1:8000/docs`
 ## 16. Frontend Description
 The dashboard in [frontend/index.html](frontend/index.html) is an industrial single-page application built with enterprise dark navy / charcoal styling:
 1. **Sidebar Navigation:** 7 views: Overview, Solar Assets, Wind Assets, Anomaly Detection, AI Copilot, Model Performance, and Settings/API.
-2. **Top Navigation Bar:** Project branding, system operational status badge, last updated timestamp, and global asset filter.
-3. **Fleet Overview Tab:** 7 SCADA KPI cards, dual-series Actual vs Forecast power line chart, and a dynamically calculated anomaly severity doughnut chart.
+2. **Fleet Overview Tab (Optimized Viewport):** Scaled with compact cards and responsive charts (220px) preventing oversized scrolling or default zoom-in issues on 1080p laptop displays and Railway cloud hosting.
+3. **Multi-Tier AI Copilot Tab:**
+   - **Inference Engine Switcher:** Allows operators to toggle between `✨ Gemini 2.5 Flash (GenAI / Auto)` and `⚙️ Rule-Based SOP (Deterministic)`.
+   - **Tier 1 (Verified ML SCADA):** Displays verified sensor readings, expected forecast baseline, and active variance.
+   - **Tier 2 (Domain SOP Rules):** Displays governing IEC/ISO engineering standards and standard operating procedures.
+   - **Tier 3 (GenAI Operator Synthesis):** Shows operator summary, potential contributing factors badged as `[Hypothesis]`, and field follow-up questions.
+   - **Dynamic Fallback Banner:** Notifies operator when operating in offline deterministic mode.
 4. **Solar & Wind Asset Tabs:** Power conversion curves, temperature envelopes, and drivetrain vibration tracking against ISO 10816 thresholds.
 5. **Anomaly Table:** Interactive table with severity badges (Critical, Medium), percentage variances, anomaly scores, and "Diagnose" action buttons.
-6. **Copilot Workbench:** Displays headline, physical hypothesis, telemetry evidence array, and maintenance action items.
-7. **Model Performance Tab:** Side-by-side regression metrics and anomaly detection statistics.
+6. **Model Performance Tab:** Side-by-side regression metrics and anomaly detection statistics.
 
 ---
 
-## 17. Installation Instructions
+## 17. Installation & Configuration
 
 ```bash
 # 1. Clone repository
@@ -276,6 +315,12 @@ source .venv/bin/activate
 
 # 3. Install pinned dependencies
 pip install -r requirements.txt
+
+# 4. (Optional) Configure Gemini API Key for GenAI Copilot
+# Windows PowerShell:
+Copy-Item .env.example .env
+# Edit .env and paste your GEMINI_API_KEY
+# If GEMINI_API_KEY is not set, the application operates in 100% deterministic SOP fallback mode.
 ```
 
 ---
@@ -294,7 +339,7 @@ The frontend is embedded and served directly by FastAPI:
 1. Ensure the backend server is running on `127.0.0.1:8000`.
 2. Open your web browser and navigate to:
    **`http://127.0.0.1:8000/`**
-3. The dashboard will automatically initialize, query `/api/fleet/summary`, `/api/anomalies`, and `/api/telemetry`, and render all interactive charts.
+3. The dashboard will automatically initialize, query `/api/fleet/summary`, `/api/anomalies`, `/api/telemetry`, and `/api/copilot/explain`, and render all interactive charts with comfortable 100% viewport scaling.
 
 ---
 
@@ -302,14 +347,20 @@ The frontend is embedded and served directly by FastAPI:
 Run the automated test suite using pytest from the repository root:
 
 ```bash
-# Run automated test suite (12 tests)
+# Run automated test suite (19 tests covering ML models, API endpoints, and LLM GenAI service with mock isolation)
 python -m pytest -q
 
 # Run standalone evaluation & reproducibility verification
 python backend/train_and_evaluate.py
 ```
 
-All 12 automated unit and integration tests pass consistently (`12 passed in 2.73s`).
+All 19 automated unit and integration tests pass consistently (`19 passed in ~4.5s`). Tests verify:
+- API endpoint validation and responses.
+- Expected forecast baseline generation (Random Forest and Linear Regressor).
+- Isolation Forest anomaly capture (100% recall on benchmark injected anomalies).
+- Grounded GenAI synthesis with mocked Google Gemini responses (zero external API tokens billed during tests).
+- Deterministic fallback when `GEMINI_API_KEY` is absent or times out.
+- Immutability of ground-truth telemetry and ML scores.
 
 ---
 
@@ -330,8 +381,10 @@ The application is pre-configured for deployment on [Railway](https://railway.ap
 ### Deployment Steps:
 1. Log in to [railway.app](https://railway.app) and create a **New Project**.
 2. Select **Deploy from GitHub repo** and select this repository.
-3. Railway will automatically detect the root `Procfile` / `Dockerfile` and deploy the service.
-4. Verify deployment by visiting `https://<your-railway-domain>/health`.
+3. (Optional) In Railway Project Settings -> **Variables**, add `GEMINI_API_KEY` to enable live Google Gemini GenAI synthesis. If left empty, the application runs stably in deterministic SOP fallback mode.
+4. Railway will automatically detect the root `Procfile` / `Dockerfile` and deploy the service.
+5. Verify deployment by visiting `https://<your-railway-domain>/health`.
+6. Open `https://<your-railway-domain>/` in any browser: the Overview page now opens cleanly without excessive zoom.
 
 ---
 
