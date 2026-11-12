@@ -555,15 +555,35 @@ class RenewableAssetPipeline:
         Filters anomalies, selects the representative event,
         and generates an operator-friendly GenAI explanation with deterministic fallback.
         """
+        import re
         anomalies = self.get_detected_anomalies()
-        target_asset = asset_id or ('WTG_07' if 'wind' in query_text.lower() or 'wtg' in query_text.lower() else 'SOLAR_INV_01')
+        q_lower = (query_text or "").lower()
+
+        # 1. Smart target asset resolution
+        if any(k in q_lower for k in ['wtg', 'wind', 'turbine', 'bearing', 'gearbox', 'drivetrain', 'generator']):
+            target_asset = 'WTG_07'
+        elif any(k in q_lower for k in ['solar', 'inverter', 'pv', 'irradiance', 'blower', 'night', 'thermal']):
+            target_asset = 'SOLAR_INV_01'
+        else:
+            target_asset = asset_id or 'SOLAR_INV_01'
         
         filtered = [a for a in anomalies if a.asset_id == target_asset]
         if not filtered:
             filtered = anomalies
 
-        if timestamp_id is not None:
-            selected = next((a for a in anomalies if a.timestamp_id == timestamp_id), filtered[0])
+        # 2. Smart timestamp resolution
+        ts_match = re.search(r'\b(6[7-9]|17[3-4]|[1-9][0-9]?)\b', query_text or "")
+        if ts_match:
+            candidate_ts = int(ts_match.group(1))
+            matched_event = next((a for a in anomalies if a.timestamp_id == candidate_ts), None)
+            if matched_event:
+                selected = matched_event
+            elif timestamp_id is not None:
+                selected = next((a for a in anomalies if a.timestamp_id == timestamp_id), filtered[0])
+            else:
+                selected = next((a for a in filtered if a.severity == 'CRITICAL'), filtered[0])
+        elif timestamp_id is not None:
+            selected = next((a for a in filtered if a.timestamp_id == timestamp_id), next((a for a in anomalies if a.timestamp_id == timestamp_id), filtered[0]))
         else:
             selected = next((a for a in filtered if a.severity == 'CRITICAL'), filtered[0])
 

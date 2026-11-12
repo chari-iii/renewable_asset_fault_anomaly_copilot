@@ -167,6 +167,30 @@ def test_sops_endpoint():
     assert "WIND_TURBINE_BEARING_DRIVETRAIN_FAULT" in sops
 
 
+def test_query_intent_navigation_and_explanation():
+    """Verifies that user queries smart-route to the intended asset and explain why it happened and what should be done."""
+    # 1. Query for wind bearing vibration
+    res_wind = run_case(Query(text="Why is bearing vibration high on wind turbine?", mode="deterministic"))
+    assert res_wind["asset_analyzed"] == "WTG_07"
+    exp_wind = res_wind["copilot_explanation"]
+    assert exp_wind["why_it_happened"] is not None
+    assert "bearing" in exp_wind["why_it_happened"].lower() or "vibration" in exp_wind["why_it_happened"].lower()
+    assert exp_wind["what_should_be_done"] is not None
+    assert "LOTO" in exp_wind["what_should_be_done"] or "curtail" in exp_wind["what_should_be_done"]
+
+    # 2. Query for solar inverter thermal runaway
+    res_solar = run_case(Query(text="What should be done for solar inverter thermal runaway?", mode="deterministic"))
+    assert res_solar["asset_analyzed"] == "SOLAR_INV_01"
+    exp_solar = res_solar["copilot_explanation"]
+    assert exp_solar["why_it_happened"] is not None
+    assert exp_solar["what_should_be_done"] is not None
+    assert "Action Plan" in exp_solar["what_should_be_done"]
+
+    # 3. Query mentioning specific timestamp #174
+    res_ts = run_case(Query(text="Explain power deficit at timestamp 174", mode="deterministic"))
+    assert res_ts["asset_analyzed"] == "WTG_07"
+
+
 if __name__ == "__main__":
     test_pipeline_initialization()
     test_model_metrics()

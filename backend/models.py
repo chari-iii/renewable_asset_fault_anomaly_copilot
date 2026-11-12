@@ -61,6 +61,9 @@ class CopilotExplanation(BaseModel):
     severity_summary: Optional[str] = None
     potential_contributing_factors: List[str] = Field(default_factory=list)
     operator_follow_up_questions: List[str] = Field(default_factory=list)
+    query_answer: Optional[str] = None
+    why_it_happened: Optional[str] = None
+    what_should_be_done: Optional[str] = None
 
 
 class PipelineRunResponse(BaseModel):

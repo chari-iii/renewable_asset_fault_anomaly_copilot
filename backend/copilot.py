@@ -80,6 +80,19 @@ def generate_copilot_explanation(
                 f"active power conversion indicates forced-air cooling fan motor bearing seizure, intake dust filter "
                 f"blockage, or auxiliary power transformer resonance."
             )
+            why_it_happened = (
+                f"At Hour {hour:02d}:00 with zero solar irradiance (0 W/m²), inverter cabinet temperature spiked abnormally to "
+                f"{temperature_c:.1f}°C accompanied by {vibration_mm_s:.2f} mm/s cooling blower vibration. This occurred because "
+                f"the auxiliary forced-cooling blower fan motor experienced mechanical bearing seizure / impeller rubbing while "
+                f"auxiliary transformers and control modules remained energized without airflow, trapping resistive heat inside the enclosure."
+            )
+            what_should_be_done = (
+                f"Immediate 4-Step Field Action Plan (IEC 62109-1 / SOP-PV-042): "
+                f"1. Isolate and Lockout/Tagout (LOTO) inverter unit AC/DC disconnects; "
+                f"2. Perform FLIR infrared thermographic scan of blower motor housing and IGBT heatsinks; "
+                f"3. Inspect cooling blower impeller for debris binding and replace seized fan bearings; "
+                f"4. Clean intake dust filters and verify auxiliary power supply circuit breakers."
+            )
             potential_factors = [
                 "[Hypothesis] Forced-air cooling fan motor bearing seizure or impeller mechanical rub",
                 "[Hypothesis] Inverter cabinet intake filter dust clogging restricting convective airflow",
@@ -96,6 +109,8 @@ def generate_copilot_explanation(
                 f"Asset {asset_id} is operating within tolerable limits with minor deviation. "
                 f"Actual power matches expected generation profile within margin of error."
             )
+            why_it_happened = f"Asset {asset_id} temperature ({temperature_c:.1f}°C) and vibration ({vibration_mm_s:.2f} mm/s) reflect expected diurnal cooling during non-generating hours."
+            what_should_be_done = "Routine Monitoring: Verify daily generation log and perform scheduled monthly visual inspection."
             potential_factors = [
                 "[Hypothesis] Normal thermal dissipation following daytime diurnal generation cycle"
             ]
@@ -111,6 +126,19 @@ def generate_copilot_explanation(
                 f"Occurring during early morning wind conditions ({actual_power_mw:.2f} MW actual power), this signature "
                 f"strongly indicates generator drive-end bearing spalling, gearbox high-speed shaft distress, or "
                 f"lubrication line starvation."
+            )
+            why_it_happened = (
+                f"At Hour {hour:02d}:00, WTG_07 drivetrain vibration spiked to {vibration_mm_s:.2f} mm/s RMS (breaching the "
+                f"ISO 10816-21 Zone D danger limit of 3.5 mm/s) with bearing temperature at {temperature_c:.1f}°C, causing a "
+                f"{variance_pct:.1f}% ({variance_mw:.3f} MW) active generation deficit. This occurred due to generator "
+                f"drive-end bearing surface spalling, high-speed shaft mechanical misalignment, or lubrication starvation causing excessive frictional drag."
+            )
+            what_should_be_done = (
+                f"Immediate 4-Step Field Action Plan (ISO 10816-21 / SOP-WT-089): "
+                f"1. Immediately curtail turbine operation and engage high-speed shaft mechanical rotor brake; "
+                f"2. Ascend to nacelle under LOTO safety protocol and visually inspect generator drive-end bearing housing for discoloration; "
+                f"3. Extract a 50ml lube oil sample for laboratory particle count and spectrographic wear metal analysis; "
+                f"4. Connect portable accelerometer to acquire high-frequency FFT vibration spectra checking for BPFO/BPFI defect harmonics."
             )
             potential_factors = [
                 "[Hypothesis] Generator drive-end bearing race spalling or mechanical roller pitting",
@@ -128,12 +156,36 @@ def generate_copilot_explanation(
                 f"Asset {asset_id} drivetrain operating within ISO 10816 Zone A/B vibration limits. "
                 f"Power generation is tracking the expected aerodynamic power curve."
             )
+            why_it_happened = f"Drivetrain RMS vibration ({vibration_mm_s:.2f} mm/s) is within acceptable ISO 10816 Zone A/B boundaries."
+            what_should_be_done = "Routine Monitoring: Maintain scheduled 500-hour grease replenishment and continuous SCADA vibration logging."
             potential_factors = [
                 "[Hypothesis] Normal mechanical drivetrain operation under current wind turbulence intensity"
             ]
             questions = [
                 "Are nacelle anemometer and wind vane readings aligned with adjacent turbine met-mast data?"
             ]
+
+    # 5. Formulate specific answer to operator query if supplied
+    query_answer = None
+    if user_query and user_query.strip():
+        q_clean = user_query.strip()
+        q_lower = q_clean.lower()
+        if "why" in q_lower or "cause" in q_lower or "reason" in q_lower or "happen" in q_lower:
+            query_answer = f"Root Cause Analysis for your query ('{q_clean}'): {why_it_happened}"
+        elif "what" in q_lower or "do" in q_lower or "fix" in q_lower or "check" in q_lower or "action" in q_lower or "step" in q_lower or "recommend" in q_lower:
+            query_answer = f"Recommended Operator Action Plan for your query ('{q_clean}'): {what_should_be_done}"
+        elif "safe" in q_lower or "run" in q_lower or "operate" in q_lower:
+            query_answer = (
+                f"Safety Assessment for your query ('{q_clean}'): Continued operation is NOT recommended. "
+                f"Severity is {severity} breaching {sop['standard_reference']}. Immediate safety shutdown mandated."
+                if severity == "CRITICAL" else
+                f"Safety Assessment: Asset is operating within tolerable limits. Safe to continue under routine monitoring."
+            )
+        else:
+            query_answer = f"Direct Triage for '{q_clean}': {fault_hypothesis} Primary Recommendation: {what_should_be_done}"
+
+        # Prepend operator query tag to headline for clarity
+        headline = f"Query Triage: '{q_clean}' — {headline}"
 
     severity_summary = (
         f"Operational Risk: {severity}. Immediate field triage and LOTO safety inspection mandated under {sop['id']}."
@@ -153,5 +205,8 @@ def generate_copilot_explanation(
         safeguard_note="Engineering Guardrail: Output strictly derived from verified sensor limits, ISO 10816/IEC standards, and scikit-learn models.",
         severity_summary=severity_summary,
         potential_contributing_factors=potential_factors,
-        operator_follow_up_questions=questions
+        operator_follow_up_questions=questions,
+        query_answer=query_answer,
+        why_it_happened=why_it_happened,
+        what_should_be_done=what_should_be_done
     )

@@ -102,6 +102,9 @@ def build_grounded_prompt(
         f"- headline: (string) Concise operator headline summarizing the asset condition.\n"
         f"- severity_summary: (string) Factual 1-sentence assessment of operational risk.\n"
         f"- variance_explanation: (string) Clear explanation of the power variance ({variance_mw:+.3f} MW, {variance_pct:+.1f}%).\n"
+        f"- why_it_happened: (string) Clear explanation of the physical/operational mechanism that caused this anomaly.\n"
+        f"- what_should_be_done: (string) Prioritized step-by-step field remediation actions according to the SOP.\n"
+        f"- query_answer: (string) Direct, clear answer to the operator query ('{user_query or 'General Triage'}').\n"
         f"- potential_contributing_factors: (list of strings) 2 to 3 physical hypotheses, each explicitly starting with '[Hypothesis]'.\n"
         f"- recommended_inspection_steps: (list of strings) 3 to 5 prioritized maintenance actions aligned with the retrieved SOP.\n"
         f"- operator_follow_up_questions: (list of strings) 2 to 3 specific diagnostic questions for the field technician.\n"
@@ -253,7 +256,10 @@ def generate_llm_explanation(
             model_name=model_name,
             severity_summary=data.get("severity_summary", f"Severity assessed as {severity}"),
             potential_contributing_factors=hypotheses,
-            operator_follow_up_questions=questions
+            operator_follow_up_questions=questions,
+            query_answer=data.get("query_answer"),
+            why_it_happened=data.get("why_it_happened"),
+            what_should_be_done=data.get("what_should_be_done")
         )
 
     except Exception as e:

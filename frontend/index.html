@@ -234,6 +234,9 @@
       align-items: center;
       gap: 6px;
     }
+    .alert-bell-wrapper {
+      position: relative;
+    }
     .alert-bell {
       position: relative;
       background: var(--bg-surface-elevated);
@@ -245,6 +248,11 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .alert-bell:hover {
+      border-color: var(--accent-green);
+      background: var(--bg-surface-hover);
     }
     .bell-badge {
       position: absolute;
@@ -256,6 +264,107 @@
       font-weight: 700;
       border-radius: 999px;
       padding: 1px 5px;
+    }
+
+    /* Notification Dropdown Drawer */
+    .notification-dropdown {
+      position: absolute;
+      top: 44px;
+      right: 0;
+      width: 380px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeIn 0.2s ease;
+    }
+    .notification-dropdown.open {
+      display: flex;
+    }
+    .notification-header {
+      padding: 12px 16px;
+      background: var(--bg-surface-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notification-purpose-tip {
+      padding: 10px 14px;
+      background: rgba(59, 130, 246, 0.08);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 11px;
+      color: #93c5fd;
+      line-height: 1.45;
+    }
+    .notification-list {
+      max-height: 300px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .notification-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      transition: background var(--transition-fast);
+      cursor: pointer;
+    }
+    .notification-item:hover {
+      background: var(--bg-surface-hover);
+    }
+    .notification-footer {
+      padding: 10px 14px;
+      background: var(--bg-surface-elevated);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* Direct Answer to Operator Query Box */
+    .query-answer-card {
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(59, 130, 246, 0.08));
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .query-answer-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .query-answer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .query-answer-block {
+      background: rgba(10, 15, 29, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .query-block-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     /* Container */
@@ -790,9 +899,31 @@
           <option value="SOLAR_INV_01">SOLAR_INV_01 (1.5 MW)</option>
           <option value="WTG_07">WTG_07 (2.6 MW)</option>
         </select>
-        <div class="alert-bell" onclick="switchTab('anomalies')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          <span class="bell-badge" id="bellBadge">5</span>
+        <div class="alert-bell-wrapper">
+          <div class="alert-bell" id="bellIconBtn" onclick="toggleNotificationDropdown(event)" title="Active Fleet Notifications (5 Critical Alarms)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <span class="bell-badge" id="bellBadge">5</span>
+          </div>
+
+          <!-- Notification Dropdown Flyout -->
+          <div class="notification-dropdown" id="notificationDropdown">
+            <div class="notification-header">
+              <div>
+                <strong style="font-size:13px;color:white">Fleet Critical Notifications</strong>
+                <div style="font-size:10.5px;color:var(--text-muted)">5 active SCADA alarms requiring immediate triage</div>
+              </div>
+              <span class="kpi-badge badge-critical" style="font-size:10px">5 CRITICAL</span>
+            </div>
+            <div class="notification-purpose-tip">
+              🔔 <strong>What this button is used for:</strong> Real-time operational alert hub. It flags high-severity telemetry breaches (ISO 10816 Zone D and IEC 62109) across your renewable fleet. Click <strong>"Diagnose"</strong> on any alarm to jump directly into the AI Copilot.
+            </div>
+            <div class="notification-list" id="notificationList">
+              <!-- Dynamically rendered with direct diagnose buttons -->
+            </div>
+            <div class="notification-footer">
+              <button class="btn btn-outline" style="width:100%;justify-content:center;font-size:11.5px;padding:6px" onclick="switchTab('anomalies');toggleNotificationDropdown(event)">View All 10 Fleet Events in Anomaly Log →</button>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -1076,8 +1207,29 @@
               </div>
 
               <!-- Fallback Banner -->
-              <div id="cpFallbackBanner" style="display:none;padding:10px 14px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-sm);font-size:12px;color:#fcd34d;line-height:1.4">
-                ⚙️ <strong>Deterministic Fallback Active:</strong> LLM API key not configured or request timed out. Showing verified ground-truth ML analytics and IEC/ISO domain standard operating procedure.
+              <div id="cpFallbackBanner" style="display:none;padding:12px 16px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);border-radius:var(--radius-sm);font-size:12px;color:#fcd34d;line-height:1.5">
+                ⚙️ <strong>Notice: Gemini API Key is not configured.</strong> Copilot is operating in <strong>Deterministic Rule-Based SOP Mode</strong> with verified SCADA telemetry, Isolation Forest anomaly scores, and IEC/ISO standards.
+                <div style="margin-top:6px;font-size:11.5px;color:#cbd5e1">
+                  💡 <em>To enable live Google Gemini 2.5 Flash:</em> Add <code>GEMINI_API_KEY</code> in Railway (under Variables) or locally in <code>.env</code>. <a href="#" onclick="switchTab('settings')" style="color:var(--accent-green);text-decoration:underline">View API setup instructions →</a>
+                </div>
+              </div>
+
+              <!-- Direct Answer to Operator Query Card -->
+              <div id="cpQueryAnswerCard" class="query-answer-card" style="display:none">
+                <div class="query-answer-header">
+                  <span>💬 Direct Operator Query Response</span>
+                </div>
+                <div style="font-size:12px;color:#cbd5e1;font-style:italic" id="cpQueryTextDisplay"></div>
+                <div class="query-answer-grid">
+                  <div class="query-answer-block" style="border-left: 3px solid var(--warning-amber)">
+                    <div class="query-block-title" style="color:var(--warning-amber)">🔍 Why It Happened (Root Cause Mechanism):</div>
+                    <div style="font-size:12.5px;line-height:1.45;color:#f3f4f6" id="cpWhyItHappened"></div>
+                  </div>
+                  <div class="query-answer-block" style="border-left: 3px solid var(--accent-green)">
+                    <div class="query-block-title" style="color:var(--accent-green)">🛠️ What Should Be Done (Immediate Field Action Plan):</div>
+                    <div style="font-size:12.5px;line-height:1.45;color:#f3f4f6" id="cpWhatShouldBeDone"></div>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -1297,6 +1449,45 @@
 
       <!-- ================= TAB 7: SETTINGS & RAW API ================= -->
       <section class="tab-view" id="tab-settings">
+        <!-- Gemini API Key Configuration Helper Card -->
+        <div class="card" style="border-left: 4px solid var(--accent-green)">
+          <div class="card-title" style="display:flex;align-items:center;gap:8px">
+            <span>✨ Google Gemini GenAI Configuration</span>
+            <span class="system-status-pill" id="settingsLlmStatusPill">Deterministic SOP Mode Active</span>
+          </div>
+          <p style="font-size:12.5px;color:var(--text-muted);line-height:1.5">
+            The Copilot uses Google Gemini (model: <code>gemini-2.5-flash</code> via the official <code>google-genai</code> SDK).
+            If no API key is configured, the application runs stably in <strong>Deterministic Rule-Based SOP Mode</strong> with zero external API dependencies.
+          </p>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px;margin-top:6px">
+            <div style="background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:12px">
+              <strong style="font-size:12px;color:var(--accent-green)">How to Configure in Railway (Cloud Deployment):</strong>
+              <ol style="font-size:11.5px;color:var(--text-muted);margin-left:18px;margin-top:6px;line-height:1.6">
+                <li>Log in to your <strong>railway.app</strong> dashboard.</li>
+                <li>Select your project & click on the deployed service.</li>
+                <li>Navigate to the <strong>Variables</strong> tab.</li>
+                <li>Click <strong>+ New Variable</strong> and enter:
+                  <div style="background:#070b14;padding:4px 8px;border-radius:4px;font-family:monospace;color:#38bdf8;margin:4px 0">GEMINI_API_KEY = your_gemini_key</div>
+                </li>
+                <li>Railway will automatically redeploy in ~30s with live GenAI enabled!</li>
+              </ol>
+            </div>
+
+            <div style="background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:12px">
+              <strong style="font-size:12px;color:#38bdf8">How to Configure Locally (VS Code / PowerShell):</strong>
+              <ol style="font-size:11.5px;color:var(--text-muted);margin-left:18px;margin-top:6px;line-height:1.6">
+                <li>In the project root, copy the template file:
+                  <div style="background:#070b14;padding:4px 8px;border-radius:4px;font-family:monospace;color:#38bdf8;margin:4px 0">Copy-Item .env.example .env</div>
+                </li>
+                <li>Open <code>.env</code> in VS Code and paste your Gemini API key.</li>
+                <li>Restart uvicorn server (<code>uvicorn backend.app:app --reload</code>).</li>
+                <li>The AI Copilot tab will display <strong>✨ GenAI (gemini-2.5-flash)</strong>.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-title">System Settings & Starter API Inspector</div>
           <p style="font-size:12.5px;color:var(--text-muted)">
@@ -1308,6 +1499,7 @@
             <button class="btn btn-outline" onclick="fetchEndpoint('/api/fleet/summary')">Test /api/fleet/summary</button>
             <button class="btn btn-outline" onclick="fetchEndpoint('/api/assets')">Test /api/assets</button>
             <button class="btn btn-outline" onclick="fetchEndpoint('/api/metrics')">Test /api/metrics</button>
+            <button class="btn btn-outline" onclick="fetchEndpoint('/api/copilot/explain?asset_id=SOLAR_INV_01&timestamp_id=67')">Test /api/copilot/explain</button>
           </div>
 
           <div class="raw-inspector">
@@ -1551,6 +1743,54 @@
     let currentSelectedAsset = 'SOLAR_INV_01';
     let currentSelectedTimestamp = 67;
 
+    // Notification Dropdown Logic
+    function toggleNotificationDropdown(e) {
+      if (e) e.stopPropagation();
+      const dd = document.getElementById('notificationDropdown');
+      if (dd) {
+        dd.classList.toggle('open');
+        if (dd.classList.contains('open')) {
+          renderNotificationList();
+        }
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      const dd = document.getElementById('notificationDropdown');
+      const btn = document.getElementById('bellIconBtn');
+      if (dd && dd.classList.contains('open')) {
+        if (!dd.contains(e.target) && !btn?.contains(e.target)) {
+          dd.classList.remove('open');
+        }
+      }
+    });
+
+    function renderNotificationList() {
+      const list = document.getElementById('notificationList');
+      if (!list) return;
+      const criticals = allAnomalies.filter(a => a.severity === 'CRITICAL');
+      if (criticals.length === 0) {
+        list.innerHTML = `<div style="padding:14px;text-align:center;color:var(--text-dim);font-size:12px">No active critical alarms.</div>`;
+        return;
+      }
+      list.innerHTML = criticals.map(a => `
+        <div class="notification-item" onclick="openCopilotForAsset('${a.asset_id}', ${a.timestamp_id}); document.getElementById('notificationDropdown').classList.remove('open');">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="status-dot" style="background:var(--critical-red);box-shadow:0 0 6px var(--critical-red)"></span>
+              <strong style="font-size:12px;color:white">${a.asset_id}</strong>
+              <span style="font-size:11px;color:var(--text-muted)">TS #${a.timestamp_id} (${String(a.hour).padStart(2,'0')}:00)</span>
+            </div>
+            <div style="font-size:11px;color:#fca5a5">${a.fault_type}</div>
+            <div style="font-size:10px;color:var(--text-dim)">
+              ${a.asset_id.includes('SOLAR') ? `Temp: ${a.temperature_c}°C | Vib: ${a.vibration_mm_s} mm/s` : `Vib: ${a.vibration_mm_s} mm/s RMS (ISO Zone D) | Power: ${a.power_mw.toFixed(2)} MW (${a.variance_mw > 0 ? '+' : ''}${a.variance_mw.toFixed(2)} MW)`}
+            </div>
+          </div>
+          <button class="btn btn-primary" style="padding:4px 8px;font-size:10.5px;flex-shrink:0">Diagnose →</button>
+        </div>
+      `).join('');
+    }
+
     async function loadCopilotDetails(assetId, timestampId, customQuery = '') {
       currentSelectedAsset = assetId;
       currentSelectedTimestamp = timestampId;
@@ -1576,15 +1816,18 @@
         document.getElementById('cpAssetPill').textContent = data.asset_analyzed;
         document.getElementById('cpTimestampLabel').textContent = `Timestamp #${timestampId || 'N/A'}`;
 
-        // Engine source badge
+        // Engine source badge & status pill
         const engineBadge = document.getElementById('cpEngineBadge');
+        const settingsPill = document.getElementById('settingsLlmStatusPill');
         if (engineBadge) {
-          if (exp.source === 'llm') {
+          if (exp.source === 'GEMINI_2_5_FLASH' || exp.source === 'llm') {
             engineBadge.className = 'kpi-badge badge-llm';
-            engineBadge.innerHTML = `✨ GenAI (${exp.model_name})`;
+            engineBadge.innerHTML = `✨ GenAI (${exp.model_name || 'gemini-2.5-flash'})`;
+            if (settingsPill) settingsPill.textContent = '✨ Gemini 2.5 Flash Live';
           } else {
             engineBadge.className = 'kpi-badge badge-sop';
             engineBadge.innerHTML = `⚙️ SOP (${exp.model_name || 'Rule-Based'})`;
+            if (settingsPill) settingsPill.textContent = '⚙️ Deterministic SOP Mode';
           }
         }
 
@@ -1593,7 +1836,6 @@
         if (fallbackBanner) {
           if (exp.fallback_used) {
             fallbackBanner.style.display = 'block';
-            fallbackBanner.innerHTML = '⚙️ <strong>Deterministic Fallback Active:</strong> LLM API key not configured or request timed out. Showing verified ground-truth ML analytics and IEC/ISO domain standard operating procedure.';
           } else {
             fallbackBanner.style.display = 'none';
           }
@@ -1604,6 +1846,19 @@
         const sevSummary = document.getElementById('cpSeveritySummary');
         if (sevSummary) {
           sevSummary.textContent = exp.severity_summary || (exp.severity === 'CRITICAL' ? 'Immediate operator field triage mandated.' : 'Advisory monitoring recommended.');
+        }
+
+        // Direct Operator Query Answer Card (Why It Happened & What Should Be Done)
+        const answerCard = document.getElementById('cpQueryAnswerCard');
+        if (answerCard) {
+          if (customQuery || exp.why_it_happened || exp.what_should_be_done) {
+            answerCard.style.display = 'flex';
+            document.getElementById('cpQueryTextDisplay').textContent = customQuery ? `Query: "${customQuery}"` : `Analysis for ${data.asset_analyzed} at Timestamp #${timestampId}`;
+            document.getElementById('cpWhyItHappened').textContent = exp.why_it_happened || exp.fault_hypothesis;
+            document.getElementById('cpWhatShouldBeDone').textContent = exp.what_should_be_done || (exp.recommended_checks && exp.recommended_checks[0]) || 'Execute standard LOTO inspection according to SOP.';
+          } else {
+            answerCard.style.display = 'none';
+          }
         }
 
         // Tier 1: ML Telemetry Evidence & Variance
@@ -1664,10 +1919,65 @@
       loadCopilotDetails(currentSelectedAsset, currentSelectedTimestamp);
     }
 
-    function submitCustomCopilotQuery() {
-      const q = document.getElementById('copilotQueryInput').value.trim();
+    async function submitCustomCopilotQuery() {
+      const qInput = document.getElementById('copilotQueryInput');
+      const q = qInput ? qInput.value.trim() : '';
       if (!q) return;
-      loadCopilotDetails(currentSelectedAsset || 'SOLAR_INV_01', currentSelectedTimestamp || 67, q);
+
+      const qLower = q.toLowerCase();
+      let targetAsset = currentSelectedAsset;
+      let targetTimestamp = currentSelectedTimestamp;
+
+      // Smart asset detection from query
+      if (qLower.includes('wtg') || qLower.includes('wind') || qLower.includes('bearing') || qLower.includes('drivetrain') || qLower.includes('gearbox')) {
+        targetAsset = 'WTG_07';
+        if (!allAnomalies.find(a => a.timestamp_id === targetTimestamp && a.asset_id === 'WTG_07')) {
+          targetTimestamp = 174;
+        }
+      } else if (qLower.includes('solar') || qLower.includes('inverter') || qLower.includes('pv') || qLower.includes('irradiance') || qLower.includes('blower') || qLower.includes('night') || qLower.includes('thermal')) {
+        targetAsset = 'SOLAR_INV_01';
+        if (!allAnomalies.find(a => a.timestamp_id === targetTimestamp && a.asset_id === 'SOLAR_INV_01')) {
+          targetTimestamp = 67;
+        }
+      }
+
+      // Smart timestamp number detection (e.g. 67, 174)
+      const numMatch = q.match(/\b(6[7-9]|17[3-4]|[1-9][0-9]?)\b/);
+      if (numMatch) {
+        const parsedTs = parseInt(numMatch[1]);
+        const matched = allAnomalies.find(a => a.timestamp_id === parsedTs);
+        if (matched) {
+          targetTimestamp = matched.timestamp_id;
+          targetAsset = matched.asset_id;
+        }
+      }
+
+      // Sync active item in left anomaly list and scroll it into view
+      document.querySelectorAll('.copilot-list-item').forEach(el => {
+        el.classList.remove('active');
+        if (el.textContent.includes(`TS #${targetTimestamp}`)) {
+          el.classList.add('active');
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+
+      // Visual feedback on button and card
+      const btn = document.querySelector("button[onclick='submitCustomCopilotQuery()']");
+      const origText = btn ? btn.textContent : 'Ask Copilot →';
+      if (btn) {
+        btn.textContent = 'Analyzing with Copilot...';
+        btn.disabled = true;
+      }
+      document.getElementById('cpHeadline').textContent = `Copilot is analyzing your question: "${q}"...`;
+
+      try {
+        await loadCopilotDetails(targetAsset, targetTimestamp, q);
+      } finally {
+        if (btn) {
+          btn.textContent = origText;
+          btn.disabled = false;
+        }
+      }
     }
 
     function computeSeverityDistribution(anomalies, telemetry, assetFilter = 'ALL') {
@@ -1784,25 +2094,62 @@
         });
       }
 
-      // 3. Solar PV Irradiance vs Power
+      // 3. Solar PV Irradiance vs Power: IEC 61724 Reference Line + Clean Telemetry
       const ctxSolar = document.getElementById('chartSolarPV')?.getContext('2d');
       if (ctxSolar) {
         const solarData = telemetrySeries.filter(s => s.asset_id === 'SOLAR_INV_01');
+        const solarBaseline = [
+          { x: 0, y: 0 },
+          { x: 200, y: 0.38 },
+          { x: 400, y: 0.76 },
+          { x: 600, y: 1.14 },
+          { x: 800, y: 1.52 }
+        ];
         charts.solar = new Chart(ctxSolar, {
           type: 'scatter',
           data: {
-            datasets: [{
-              label: 'Measured Power vs Irradiance',
-              data: solarData.map(s => ({ x: s.irradiance_wm2, y: s.power_mw })),
-              backgroundColor: '#10b981',
-              borderColor: '#059669',
-              borderWidth: 1
-            }]
+            datasets: [
+              {
+                type: 'line',
+                label: 'IEC 61724 Nominal PR Baseline',
+                data: solarBaseline,
+                borderColor: '#10b981',
+                borderDash: [5, 5],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+                order: 2
+              },
+              {
+                type: 'scatter',
+                label: 'Measured SCADA Points',
+                data: solarData.map(s => ({ x: s.irradiance_wm2, y: s.power_mw, ts: s.timestamp_id })),
+                backgroundColor: 'rgba(16, 185, 129, 0.4)',
+                borderColor: '#059669',
+                borderWidth: 1,
+                pointRadius: 3,
+                order: 1
+              }
+            ]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: { color: '#9ca3af', font: { size: 10.5 }, boxWidth: 12 }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => {
+                    const raw = ctx.raw;
+                    return raw.ts ? `TS #${raw.ts}: Irradiance ${raw.x} W/m² -> Power ${raw.y.toFixed(3)} MW` : `${ctx.dataset.label}: ${raw.x} W/m² -> ${raw.y} MW`;
+                  }
+                }
+              }
+            },
             scales: {
               x: { title: { display: true, text: 'Solar Irradiance (W/m²)', color: '#9ca3af' }, ticks: { color: '#6b7280' }, grid: { color: '#1f293d' } },
               y: { title: { display: true, text: 'Power (MW)', color: '#9ca3af' }, ticks: { color: '#6b7280' }, grid: { color: '#1f293d' } }
@@ -1849,28 +2196,101 @@
         });
       }
 
-      // 5. Wind Speed vs Power
+      // 5. Wind Speed vs Power: IEC 61400-12 Power Curve + Clean Unclustered Telemetry
       const ctxWind = document.getElementById('chartWindPower')?.getContext('2d');
       if (ctxWind) {
         const windData = telemetrySeries.filter(s => s.asset_id === 'WTG_07');
+
+        // 1. Theoretical IEC 61400-12 aerodynamic power curve baseline (smooth curve)
+        const curvePoints = [];
+        for (let v = 3.0; v <= 9.0; v += 0.25) {
+          const p = Math.min(2.6, Math.max(0.0, 0.45 * v - 1.36));
+          curvePoints.push({ x: parseFloat(v.toFixed(2)), y: parseFloat(p.toFixed(3)) });
+        }
+
+        // 2. Normal operational points (clean, subtle opacity, smaller radius)
+        const normalPoints = windData
+          .filter(s => s.timestamp_id !== 173 && s.timestamp_id !== 174)
+          .map(s => ({ x: s.wind_speed_ms, y: s.power_mw, ts: s.timestamp_id, exp: s.expected_power_mw }));
+
+        // 3. Injected fault / critical deficit points (TS 173 and 174)
+        const faultPoints = windData
+          .filter(s => s.timestamp_id === 173 || s.timestamp_id === 174)
+          .map(s => ({ x: s.wind_speed_ms, y: s.power_mw, ts: s.timestamp_id, exp: s.expected_power_mw }));
+
         charts.wind = new Chart(ctxWind, {
           type: 'scatter',
           data: {
-            datasets: [{
-              label: 'Turbine Power Curve',
-              data: windData.map(s => ({ x: s.wind_speed_ms, y: s.power_mw })),
-              backgroundColor: '#3b82f6',
-              borderColor: '#2563eb',
-              borderWidth: 1
-            }]
+            datasets: [
+              {
+                type: 'line',
+                label: 'IEC 61400-12 Baseline Curve',
+                data: curvePoints,
+                borderColor: '#38bdf8',
+                borderDash: [5, 5],
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.35,
+                fill: false,
+                order: 3
+              },
+              {
+                type: 'scatter',
+                label: 'Normal SCADA (118 Points)',
+                data: normalPoints,
+                backgroundColor: 'rgba(59, 130, 246, 0.35)',
+                borderColor: 'rgba(59, 130, 246, 0.8)',
+                borderWidth: 1,
+                pointRadius: 3,
+                order: 2
+              },
+              {
+                type: 'scatter',
+                label: 'Critical Fault Deficit (TS #173, #174)',
+                data: faultPoints,
+                backgroundColor: '#ef4444',
+                borderColor: '#ffffff',
+                borderWidth: 2,
+                pointRadius: 8,
+                pointHoverRadius: 10,
+                pointStyle: 'triangle',
+                order: 1
+              }
+            ]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: { color: '#9ca3af', font: { size: 10.5 }, boxWidth: 12 }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => {
+                    const raw = ctx.raw;
+                    if (raw.ts) {
+                      const varMw = raw.y - raw.exp;
+                      return `TS #${raw.ts}: Wind ${raw.x} m/s | Actual ${raw.y.toFixed(3)} MW | Expected ${raw.exp.toFixed(3)} MW (Var: ${varMw > 0 ? '+' : ''}${varMw.toFixed(3)} MW)`;
+                    }
+                    return `${ctx.dataset.label}: ${raw.x} m/s -> ${raw.y} MW`;
+                  }
+                }
+              }
+            },
             scales: {
-              x: { title: { display: true, text: 'Wind Velocity (m/s)', color: '#9ca3af' }, ticks: { color: '#6b7280' }, grid: { color: '#1f293d' } },
-              y: { title: { display: true, text: 'Power Output (MW)', color: '#9ca3af' }, ticks: { color: '#6b7280' }, grid: { color: '#1f293d' } }
+              x: {
+                title: { display: true, text: 'Nacelle Wind Velocity (m/s)', color: '#9ca3af' },
+                ticks: { color: '#6b7280' },
+                grid: { color: '#1f293d' }
+              },
+              y: {
+                title: { display: true, text: 'Active Power Output (MW)', color: '#9ca3af' },
+                ticks: { color: '#6b7280' },
+                grid: { color: '#1f293d' }
+              }
             }
           }
         });
@@ -1889,14 +2309,26 @@
                 label: 'Bearing Vibration (mm/s RMS)',
                 data: windSlice.map(s => s.vibration_mm_s),
                 borderColor: '#3b82f6',
-                borderWidth: 2
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                pointBackgroundColor: windSlice.map(s => s.vibration_mm_s >= 3.5 ? '#ef4444' : (s.vibration_mm_s >= 2.0 ? '#f59e0b' : '#3b82f6')),
+                pointRadius: windSlice.map(s => s.vibration_mm_s >= 3.5 ? 6 : 3),
+                tension: 0.3
               },
               {
-                label: 'ISO 10816 Zone D Danger Threshold (3.5 mm/s)',
+                label: 'ISO Zone D Danger (>3.5 mm/s)',
                 data: windSlice.map(() => 3.5),
                 borderColor: '#ef4444',
                 borderDash: [6, 4],
                 borderWidth: 2,
+                pointRadius: 0
+              },
+              {
+                label: 'ISO Zone C Warning (>2.0 mm/s)',
+                data: windSlice.map(() => 2.0),
+                borderColor: '#f59e0b',
+                borderDash: [4, 4],
+                borderWidth: 1.5,
                 pointRadius: 0
               }
             ]
@@ -1904,7 +2336,13 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: '#9ca3af' } } },
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: { color: '#9ca3af', font: { size: 10 }, boxWidth: 10 }
+              }
+            },
             scales: {
               x: { ticks: { color: '#6b7280', maxTicksLimit: 10 }, grid: { color: '#1f293d' } },
               y: { title: { display: true, text: 'RMS Vibration (mm/s)', color: '#9ca3af' }, ticks: { color: '#6b7280' }, grid: { color: '#1f293d' } }

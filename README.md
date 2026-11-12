@@ -284,16 +284,21 @@ Interactive Swagger documentation is available at **`http://127.0.0.1:8000/docs`
 ## 16. Frontend Description
 The dashboard in [frontend/index.html](frontend/index.html) is an industrial single-page application built with enterprise dark navy / charcoal styling:
 1. **Sidebar Navigation:** 7 views: Overview, Solar Assets, Wind Assets, Anomaly Detection, AI Copilot, Model Performance, and Settings/API.
-2. **Fleet Overview Tab (Optimized Viewport):** Scaled with compact cards and responsive charts (220px) preventing oversized scrolling or default zoom-in issues on 1080p laptop displays and Railway cloud hosting.
-3. **Multi-Tier AI Copilot Tab:**
+2. **Top Navigation Bar & Active Alarm Bell Hub:** Displays real-time operational status, live clock, asset filter, and an **interactive notification drawer** indicating the 5 active critical alarms with one-click "Diagnose" routing into Copilot.
+3. **Fleet Overview Tab (Optimized Viewport):** Scaled with compact cards and responsive charts (220px) preventing oversized scrolling or default zoom-in issues on 1080p laptop displays and Railway cloud hosting.
+4. **Wind & Solar Asset Analytics (Unclustered Curves):**
+   - **Wind Power Curve:** Cleanly plots the **IEC 61400-12 Aerodynamic Power Curve Baseline** (dashed cyan line), normal operating SCADA points with subtle opacity (no point clumping or clustering), and **distinctive red triangle markers** for the critical bearing distress generation deficit at TS #173 and #174.
+   - **Drivetrain Vibration Tracking:** Dual-threshold monitoring showing ISO 10816 Zone C warning limit (2.0 mm/s) and Zone D danger limit (3.5 mm/s) with red alarm point highlights.
+   - **Solar PV Analytics:** IEC 61724 nominal performance ratio baseline paired with measured operating points and thermal envelope tracking.
+5. **Multi-Tier AI Copilot Workbench & Natural Language Query Assistant:**
+   - **Ask Copilot Search & Smart Navigation:** Accepts natural language operator queries (e.g., *"Why did bearing vibration increase on WTG_07?"*, *"What should be done for inverter thermal runaway?"*), automatically routes to the target asset and event, synchronizes the selection list, and outputs dedicated **Why It Happened (Root Cause Mechanism)** and **What Should Be Done (Immediate Field Action Plan)** cards.
    - **Inference Engine Switcher:** Allows operators to toggle between `✨ Gemini 2.5 Flash (GenAI / Auto)` and `⚙️ Rule-Based SOP (Deterministic)`.
    - **Tier 1 (Verified ML SCADA):** Displays verified sensor readings, expected forecast baseline, and active variance.
    - **Tier 2 (Domain SOP Rules):** Displays governing IEC/ISO engineering standards and standard operating procedures.
    - **Tier 3 (GenAI Operator Synthesis):** Shows operator summary, potential contributing factors badged as `[Hypothesis]`, and field follow-up questions.
-   - **Dynamic Fallback Banner:** Notifies operator when operating in offline deterministic mode.
-4. **Solar & Wind Asset Tabs:** Power conversion curves, temperature envelopes, and drivetrain vibration tracking against ISO 10816 thresholds.
-5. **Anomaly Table:** Interactive table with severity badges (Critical, Medium), percentage variances, anomaly scores, and "Diagnose" action buttons.
-6. **Model Performance Tab:** Side-by-side regression metrics and anomaly detection statistics.
+   - **Dynamic Fallback Banner:** Notifies operator when operating in offline deterministic mode with clear instructions on enabling Gemini API.
+6. **Anomaly Triage Log:** Interactive table with severity badges (Critical, Medium), percentage variances, anomaly scores, and "Diagnose" action buttons.
+7. **Model Performance Tab:** Side-by-side regression metrics and anomaly detection statistics.
 
 ---
 
@@ -347,17 +352,18 @@ The frontend is embedded and served directly by FastAPI:
 Run the automated test suite using pytest from the repository root:
 
 ```bash
-# Run automated test suite (19 tests covering ML models, API endpoints, and LLM GenAI service with mock isolation)
+# Run automated test suite (20 tests covering ML models, API endpoints, natural language query triage, and LLM GenAI service with mock isolation)
 python -m pytest -q
 
 # Run standalone evaluation & reproducibility verification
 python backend/train_and_evaluate.py
 ```
 
-All 19 automated unit and integration tests pass consistently (`19 passed in ~4.5s`). Tests verify:
-- API endpoint validation and responses.
+All 20 automated unit and integration tests pass consistently (`20 passed in ~4.3s`). Tests verify:
+- API endpoint validation and contracts.
 - Expected forecast baseline generation (Random Forest and Linear Regressor).
 - Isolation Forest anomaly capture (100% recall on benchmark injected anomalies).
+- Natural language query routing, asset intent resolution, and root cause / action plan generation.
 - Grounded GenAI synthesis with mocked Google Gemini responses (zero external API tokens billed during tests).
 - Deterministic fallback when `GEMINI_API_KEY` is absent or times out.
 - Immutability of ground-truth telemetry and ML scores.
