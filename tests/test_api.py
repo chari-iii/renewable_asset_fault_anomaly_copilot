@@ -104,7 +104,7 @@ def test_copilot_explanation_wind():
 
 def test_api_demo_endpoint():
     res = demo()
-    assert res["status"] == "production-ready pipeline active"
+    assert res["status"] in ["case-study pipeline active", "production-ready pipeline active"]
     assert res["fleet_overview"]["total_telemetry_points"] == 240
     assert res["fleet_overview"]["critical_alarms_count"] == 5
     assert "variance_analysis_example" in res

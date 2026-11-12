@@ -1,12 +1,32 @@
 """
-Renewable Energy Domain Knowledge Base & Standard Operating Procedures (SOPs).
-Includes Greenko operational guidelines, ISO 10816 vibration standards,
-and IEC 61400 / IEC 62109 engineering thresholds.
+Renewable Energy Domain Knowledge Base & Illustrative Standard Operating Procedures (SOPs).
+DISCLAIMER: The SOP entries below (SOP-PV-042, SOP-WTG-089, etc.) are illustrative operational
+knowledge templates synthesized from public international standards (IEC 62109-1, ISO 10816-21,
+IEC 61724-1, IEC 61400-1) for this case study, rather than official Greenko internal proprietary documents.
 """
 
 from typing import Dict, Any, List
 
 DOMAIN_SOP_DATABASE: Dict[str, Dict[str, Any]] = {
+    "NOMINAL_OPERATION": {
+        "id": "SOP-GEN-001",
+        "title": "Nominal Asset Operation & Routine Preventative Monitoring",
+        "standard_reference": "IEC 61724-1 / IEC 61400-1 (Nominal Operating Parameters)",
+        "applicable_asset_type": "ALL",
+        "trigger_conditions": {
+            "operational_state": "All telemetry parameters within normal operational limits"
+        },
+        "root_cause_analysis": (
+            "No active physical anomaly or performance deficit detected. "
+            "Asset is operating within nominal baseline parameters."
+        ),
+        "impact_and_risk": "Zero elevated risk. Continuous normal power generation.",
+        "recommended_operator_actions": [
+            "1. Maintain standard scheduled preventative maintenance intervals.",
+            "2. Continue automated SCADA monitoring and alarm surveillance.",
+            "3. Log routine operational parameters in plant shift diary."
+        ]
+    },
     "SOLAR_INVERTER_THERMAL_FAN_FAULT": {
         "id": "SOP-PV-042",
         "title": "Solar Inverter Cooling System & Thermal Runaway Mitigation",
@@ -115,6 +135,7 @@ def retrieve_domain_context(asset_id: str, temperature_c: float, vibration_mm_s:
     RAG Domain Knowledge Retriever:
     Matches operational telemetry anomalies with industry standards (ISO 10816, IEC)
     and returns relevant Standard Operating Procedures (SOPs).
+    Returns nominal baseline procedure when no anomaly thresholds are breached.
     """
     if "SOLAR" in asset_id.upper():
         if temperature_c > 44.0 or vibration_mm_s > 2.5:
@@ -122,11 +143,11 @@ def retrieve_domain_context(asset_id: str, temperature_c: float, vibration_mm_s:
         elif variance_mw < -0.15:
             return DOMAIN_SOP_DATABASE["SOLAR_UNDERPERFORMANCE_CURTAILMENT"]
         else:
-            return DOMAIN_SOP_DATABASE["SOLAR_INVERTER_THERMAL_FAN_FAULT"]
+            return DOMAIN_SOP_DATABASE["NOMINAL_OPERATION"]
     else:  # Wind WTG
         if vibration_mm_s > 2.5 or temperature_c > 42.0:
             return DOMAIN_SOP_DATABASE["WIND_TURBINE_BEARING_DRIVETRAIN_FAULT"]
         elif variance_mw < -0.2:
             return DOMAIN_SOP_DATABASE["WIND_TURBINE_AERODYNAMIC_UNDERPERFORMANCE"]
         else:
-            return DOMAIN_SOP_DATABASE["WIND_TURBINE_BEARING_DRIVETRAIN_FAULT"]
+            return DOMAIN_SOP_DATABASE["NOMINAL_OPERATION"]

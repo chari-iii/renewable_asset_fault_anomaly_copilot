@@ -104,7 +104,7 @@ def demo():
 
     return {
         "case_study": "Renewable Asset Fault & Anomaly Detection Copilot",
-        "status": "production-ready pipeline active",
+        "status": "case-study pipeline active",
         "expected_outcome": "A Python ML pipeline that flags anomalies in solar/wind asset telemetry and a copilot UI that explains likely causes and recommended next checks.",
         "fleet_overview": {
             "total_telemetry_points": len(pipeline.df),

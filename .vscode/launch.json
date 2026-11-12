@@ -12,8 +12,6 @@
         "127.0.0.1",
         "--port",
         "8000",
-        "--app-dir",
-        "02_renewable_asset_fault_anomaly_copilot",
         "--reload"
       ],
       "jinja": true,
@@ -23,14 +21,14 @@
       "name": "Python: Run Evaluation Suite",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/02_renewable_asset_fault_anomaly_copilot/backend/train_and_evaluate.py",
+      "program": "${workspaceFolder}/backend/train_and_evaluate.py",
       "console": "integratedTerminal"
     },
     {
       "name": "Python: Run Automated Tests",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/02_renewable_asset_fault_anomaly_copilot/tests/test_api.py",
+      "program": "${workspaceFolder}/tests/test_api.py",
       "console": "integratedTerminal"
     }
   ]

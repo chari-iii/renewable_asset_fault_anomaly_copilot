@@ -187,7 +187,7 @@ class RenewableAssetPipeline:
     def train_anomaly_detectors(self, save_to_disk: bool = True) -> Dict[str, Any]:
         """
         Trains IsolationForest anomaly detectors for Solar and Wind assets.
-        Also evaluates statistical 3-sigma / IQR baseline.
+        Evaluates in-sample benchmark sensitivity against known synthetic fault signatures.
         """
         results = {}
         solar_cols = ['temperature_c', 'vibration_mm_s', 'power_mw', 'irradiance_wm2']
