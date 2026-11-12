@@ -1,0 +1,74 @@
+{
+  "solar_power_forecasting": {
+    "train_samples": 81,
+    "test_samples": 36,
+    "chosen_model_rf": {
+      "mae_mw": 0.0012133333333337027,
+      "rmse_mw": 0.002403043209488276,
+      "r2_score": 0.9999838450941562,
+      "key_hyperparameters": {
+        "n_estimators": 100,
+        "max_depth": 6,
+        "min_samples_split": 3
+      }
+    },
+    "baseline_linear": {
+      "mae_mw": 0.00010905237587294225,
+      "rmse_mw": 0.00016489041396866648,
+      "r2_score": 0.9999999239372387
+    }
+  },
+  "wind_power_forecasting": {
+    "train_samples": 82,
+    "test_samples": 36,
+    "chosen_model_rf": {
+      "mae_mw": 0.017785816798941805,
+      "rmse_mw": 0.02579239769790141,
+      "r2_score": 0.9986062661494813,
+      "key_hyperparameters": {
+        "n_estimators": 100,
+        "max_depth": 6,
+        "min_samples_split": 3
+      }
+    },
+    "baseline_linear": {
+      "mae_mw": 0.0009565422525163054,
+      "rmse_mw": 0.0011994289972796566,
+      "r2_score": 0.9999969859843498
+    }
+  },
+  "solar_anomaly_detection": {
+    "algorithm": "Isolation Forest",
+    "contamination_setting": 0.035,
+    "n_estimators": 100,
+    "total_observations": 120,
+    "flagged_anomalies": [
+      67,
+      68,
+      69,
+      105,
+      109
+    ],
+    "precision": 0.6,
+    "recall": 1.0,
+    "f1_score": 0.7499999999999999,
+    "known_fault_capture": "3/3"
+  },
+  "wind_anomaly_detection": {
+    "algorithm": "Isolation Forest",
+    "contamination_setting": 0.035,
+    "n_estimators": 100,
+    "total_observations": 120,
+    "flagged_anomalies": [
+      166,
+      173,
+      174,
+      238,
+      218
+    ],
+    "precision": 0.4,
+    "recall": 1.0,
+    "f1_score": 0.5714285714285715,
+    "known_fault_capture": "2/2"
+  }
+}
