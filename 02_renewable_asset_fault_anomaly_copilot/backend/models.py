@@ -66,3 +66,48 @@ class PipelineRunResponse(BaseModel):
     copilot_explanation: CopilotExplanation
     evaluation_metrics: Dict[str, Any]
     limitations_and_assumptions: List[str]
+
+
+class FleetSummary(BaseModel):
+    total_monitored_assets: int
+    solar_assets: int
+    wind_assets: int
+    total_records: int
+    total_anomalies: int
+    critical_anomalies: int
+    high_anomalies: int
+    medium_anomalies: int
+    low_anomalies: int
+    average_power_mw: float
+    fleet_health_score_pct: float
+    system_status: str
+
+
+class AssetCard(BaseModel):
+    asset_id: str
+    asset_type: str
+    nominal_capacity_mw: float
+    current_power_mw: float
+    expected_power_mw: float
+    performance_deviation_pct: float
+    current_temperature_c: float
+    current_vibration_mm_s: float
+    asset_health: str
+    anomaly_status: str
+    total_anomalies: int
+
+
+class TelemetrySeriesPoint(BaseModel):
+    timestamp_id: int
+    asset_id: str
+    hour: int
+    irradiance_wm2: float
+    wind_speed_ms: float
+    temperature_c: float
+    vibration_mm_s: float
+    power_mw: float
+    expected_power_mw: float
+    variance_mw: float
+    variance_pct: float
+    is_anomaly: bool
+    severity: str

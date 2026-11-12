@@ -3,6 +3,7 @@
     "train_samples": 81,
     "test_samples": 36,
     "chosen_model_rf": {
+      "name": "Random Forest Regressor",
       "mae_mw": 0.0012133333333337027,
       "rmse_mw": 0.002403043209488276,
       "r2_score": 0.9999838450941562,
@@ -13,15 +14,18 @@
       }
     },
     "baseline_linear": {
+      "name": "Linear Physics Baseline",
       "mae_mw": 0.00010905237587294225,
       "rmse_mw": 0.00016489041396866648,
       "r2_score": 0.9999999239372387
-    }
+    },
+    "investigation_finding": "Linear regression achieves lower MAE on this bundled dataset because the benchmark data was synthesized with an exact linear formula (power_mw = 0.0019 * irradiance_wm2) without noise. In real utility-scale plants, Random Forest is preferred to handle physical nonlinearities: inverter MPPT clipping, temperature derating coefficients, and diurnal inverter heat-loss curves."
   },
   "wind_power_forecasting": {
     "train_samples": 82,
     "test_samples": 36,
     "chosen_model_rf": {
+      "name": "Random Forest Regressor",
       "mae_mw": 0.017785816798941805,
       "rmse_mw": 0.02579239769790141,
       "r2_score": 0.9986062661494813,
@@ -32,10 +36,12 @@
       }
     },
     "baseline_linear": {
+      "name": "Linear Wind Speed Baseline",
       "mae_mw": 0.0009565422525163054,
       "rmse_mw": 0.0011994289972796566,
       "r2_score": 0.9999969859843498
-    }
+    },
+    "investigation_finding": "Linear regression achieves lower MAE on this bundled dataset because the dummy wind output was generated using an affine approximation (P \u2248 0.45 * v - 1.36). In actual wind turbines, power follows a nonlinear cubic curve (P \u221d v\u00b3) that saturates at rated speed and shuts down at cut-out, which requires nonlinear models such as Random Forest."
   },
   "solar_anomaly_detection": {
     "algorithm": "Isolation Forest",

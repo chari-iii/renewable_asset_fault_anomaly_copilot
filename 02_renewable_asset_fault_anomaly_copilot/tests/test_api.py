@@ -6,6 +6,7 @@ Tests:
 3. Anomaly detection recall on verified ground-truth events.
 4. GenAI Copilot explanation grounding, severity classification, and SOP retrieval.
 5. FastAPI endpoint contracts (/api/demo, /api/run, /api/anomalies, /api/predict, /api/metrics).
+6. Fleet KPIs, telemetry time-series, and asset overview endpoints.
 """
 
 import sys
@@ -16,7 +17,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from backend.pipeline import get_pipeline
 from backend.models import Query, PredictionRequest
-from backend.app import demo, run_case, get_anomalies, predict_telemetry, get_metrics
+from backend.app import (
+    demo,
+    run_case,
+    get_anomalies,
+    predict_telemetry,
+    get_metrics,
+    get_fleet_summary,
+    get_assets,
+    get_telemetry_series,
+    get_sops
+)
 
 
 def test_pipeline_initialization():
@@ -124,22 +135,49 @@ def test_api_predict_endpoint():
     assert res["variance_mw"] < -0.4  # Deficit > 0.4 MW
 
 
+def test_fleet_summary_endpoint():
+    summary = get_fleet_summary()
+    assert summary.total_monitored_assets == 2
+    assert summary.solar_assets == 1
+    assert summary.wind_assets == 1
+    assert summary.total_records == 240
+    assert summary.critical_anomalies == 5
+    assert summary.average_power_mw > 0.0
+
+
+def test_assets_endpoint():
+    assets = get_assets()
+    assert len(assets) == 2
+    ids = {a.asset_id for a in assets}
+    assert ids == {"SOLAR_INV_01", "WTG_07"}
+
+
+def test_telemetry_series_endpoint():
+    series = get_telemetry_series("SOLAR_INV_01")
+    assert len(series) == 120
+    first = series[0]
+    assert "actual_power_mw" in first or "power_mw" in first
+    assert "expected_power_mw" in first
+    assert "variance_mw" in first
+
+
+def test_sops_endpoint():
+    sops = get_sops()
+    assert "SOLAR_INVERTER_THERMAL_FAN_FAULT" in sops
+    assert "WIND_TURBINE_BEARING_DRIVETRAIN_FAULT" in sops
+
+
 if __name__ == "__main__":
-    print("Running automated test suite...")
     test_pipeline_initialization()
-    print(" [PASS] test_pipeline_initialization")
     test_model_metrics()
-    print(" [PASS] test_model_metrics")
     test_anomaly_detection_details()
-    print(" [PASS] test_anomaly_detection_details")
     test_copilot_explanation_solar()
-    print(" [PASS] test_copilot_explanation_solar")
     test_copilot_explanation_wind()
-    print(" [PASS] test_copilot_explanation_wind")
     test_api_demo_endpoint()
-    print(" [PASS] test_api_demo_endpoint")
     test_api_run_endpoint()
-    print(" [PASS] test_api_run_endpoint")
     test_api_predict_endpoint()
-    print(" [PASS] test_api_predict_endpoint")
-    print("\nALL 8 TESTS PASSED SUCCESSFULLY! (100% Pass Rate)")
+    test_fleet_summary_endpoint()
+    test_assets_endpoint()
+    test_telemetry_series_endpoint()
+    test_sops_endpoint()
+    print("ALL 12 TESTS PASSED SUCCESSFULLY! (100% Pass Rate)")

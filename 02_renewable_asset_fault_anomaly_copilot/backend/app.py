@@ -1,17 +1,25 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import FastAPI, HTTPException, Query as FastQuery
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from backend.models import Query, PredictionRequest, AnomalyItem, PipelineRunResponse
+from backend.models import (
+    Query,
+    PredictionRequest,
+    AnomalyItem,
+    PipelineRunResponse,
+    FleetSummary,
+    AssetCard
+)
 from backend.pipeline import get_pipeline
+from backend.domain_knowledge import DOMAIN_SOP_DATABASE
 
 app = FastAPI(
     title="Renewable Asset Fault & Anomaly Detection Copilot",
     description="Greenko Enterprise AI - Anomaly detection and GenAI root-cause copilot for solar & wind assets",
-    version="2.0.0"
+    version="2.1.0"
 )
 
 # Enable CORS for local testing and deployment
@@ -33,7 +41,7 @@ pipeline = get_pipeline()
 
 @app.get("/", response_class=FileResponse)
 def serve_frontend_root():
-    """Serves the frontend interface."""
+    """Serves the main enterprise dashboard interface."""
     index_path = FRONTEND / "index.html"
     if index_path.exists():
         return FileResponse(index_path)
@@ -46,16 +54,40 @@ def serve_frontend_index():
     return FileResponse(FRONTEND / "index.html")
 
 
+@app.get("/api/fleet/summary", response_model=FleetSummary)
+def get_fleet_summary():
+    """Returns aggregated fleet KPI metrics calculated from real SCADA telemetry."""
+    return pipeline.get_fleet_summary()
+
+
+@app.get("/api/assets", response_model=List[AssetCard])
+def get_assets():
+    """Returns overview cards for each monitored asset (Solar & Wind)."""
+    return pipeline.get_asset_cards()
+
+
+@app.get("/api/telemetry")
+def get_telemetry_series(asset_id: Optional[str] = None):
+    """Returns time-series telemetry with predictions and variances for charts."""
+    return pipeline.get_telemetry_series(asset_id)
+
+
+@app.get("/api/sops")
+def get_sops():
+    """Returns the Greenko standard operating procedures and industry standards."""
+    return DOMAIN_SOP_DATABASE
+
+
 @app.get("/api/demo")
 def demo():
     """
-    Demo endpoint called by the frontend button.
+    Demo endpoint called by the frontend starter and tests.
     Returns the complete end-to-end telemetry summary, detected anomalies,
     variance calculations, copilot root-cause explanation, and model metrics.
     """
     anomalies = pipeline.get_detected_anomalies()
-    critical_events = [a.dict() for a in anomalies if a.severity == "CRITICAL"]
-    warning_events = [a.dict() for a in anomalies if a.severity == "WARNING"]
+    critical_events = [a.model_dump() for a in anomalies if a.severity == "CRITICAL"]
+    warning_events = [a.model_dump() for a in anomalies if a.severity in ["HIGH", "MEDIUM", "LOW", "WARNING"]]
     
     # Run default copilot case on the most critical event
     case_result = pipeline.run_copilot_case(
@@ -78,7 +110,7 @@ def demo():
         "sample_copilot_case": {
             "query": case_result.query,
             "asset_analyzed": case_result.asset_analyzed,
-            "copilot_explanation": case_result.copilot_explanation.dict()
+            "copilot_explanation": case_result.copilot_explanation.model_dump()
         },
         "variance_analysis_example": {
             "asset_id": "WTG_07",
@@ -121,7 +153,7 @@ def run_case(query: Query):
             asset_id=query.asset_id,
             timestamp_id=query.timestamp_id
         )
-        return response.dict()
+        return response.model_dump()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -130,10 +162,14 @@ def run_case(query: Query):
 def get_anomalies(asset_id: Optional[str] = None, severity: Optional[str] = None):
     """Returns detected telemetry anomalies with optional asset and severity filters."""
     anomalies = pipeline.get_detected_anomalies()
-    if asset_id:
+    if asset_id and asset_id.upper() != "ALL":
         anomalies = [a for a in anomalies if a.asset_id.upper() == asset_id.upper()]
-    if severity:
-        anomalies = [a for a in anomalies if a.severity.upper() == severity.upper()]
+    if severity and severity.upper() != "ALL":
+        target_sev = severity.upper()
+        if target_sev == "WARNING":
+            anomalies = [a for a in anomalies if a.severity in ["HIGH", "MEDIUM", "LOW", "WARNING"]]
+        else:
+            anomalies = [a for a in anomalies if a.severity.upper() == target_sev]
     return anomalies
 
 
